@@ -34,16 +34,26 @@ class Piece():
         _err_invalid = 'INVALID MOVE'
         _err_capture = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
         
-        def check_capture(pos_f):
-            piece = board.check(pos_f)
-            if piece.color != game.turn:
-                if piece.color != 'None':                
-                    piece.pos = 'X0'
-                    piece.status = 'captured'
-                return True
-            else:
-                print(_err_capture)
-                return False
+        def commit_move(row_i, col_i, row_f, col_f):
+            self.pos = place
+            board.state[row_f, col_f] = self
+            board.state[row_i, col_i] = xx0
+            game.pass_turn()
+            board.show()
+
+        def check_capture(func):
+            def wrapper(row_i, col_i, row_f, col_f):
+                if not func(row_i, col_i, row_f, col_f): return
+                
+                piece = board.state[row_f, col_f]
+                if piece.color != game.turn:
+                    if piece.color != 'None':                
+                        piece.pos, piece.status = 'X0', 'captured'
+                    commit_move(row_i, col_i, row_f, col_f)
+                else:
+                    print(_err_capture)
+            
+            return wrapper
 
         def check_collision(row_i, col_i, row_f, col_f):
             row_dis = abs(row_f - row_i)
@@ -66,13 +76,8 @@ class Piece():
 
             return False
 
-        def commit_move(row_i, col_i, row_f, col_f):
-            self.pos = place
-            board.state[row_f, col_f] = self
-            board.state[row_i, col_i] = xx0
-            game.pass_turn()
-            board.show()
 
+        @check_capture
         def pawn_move(row_i, col_i, row_f, col_f, check=False):
             if col_f == col_i and board.state[row_f, col_f] == xx0:
                 if (
@@ -80,49 +85,54 @@ class Piece():
                     (row_f + 1 == row_i or row_f + 2 == row_i and row_i == 6) or
                     game.turn == 'Black' and 
                     (row_f - 1 == row_i or row_f - 2 == row_i and row_i == 1)
-                ):
-                    commit_move(row_i, col_i, row_f, col_f)
+                ): return True
             elif (
                 abs(col_f - col_i) == 1 and
                 (game.turn == 'White' and row_f + 1 == row_i or
                 game.turn == 'Black' and row_f - 1 == row_i)
-            ):
-                if check_capture(place):
-                    commit_move(row_i, col_i, row_f, col_f)
-            else: print(_err_invalid)
+            ): return True
+            
+            print(_err_invalid)
+            return False
         
+        @check_capture
         def rook_move(row_i, col_i, row_f, col_f, check=False):
-            if col_i == col_f or row_i == row_f:
-                if check_capture(place):
-                    commit_move(row_i, col_i, row_f, col_f)
-            else: print(_err_invalid)
+            if col_i == col_f or row_i == row_f: return True
+            
+            print(_err_invalid)
+            return False
 
+        @check_capture
         def knight_move(row_i, col_i, row_f, col_f, check=False):
-            if (col_f - col_i)**2 + (row_f - row_i)**2 == 5:
-                if check_capture(place):
-                    commit_move(row_i, col_i, row_f, col_f)
-            else: print(_err_invalid)
+            if (col_f - col_i)**2 + (row_f - row_i)**2 == 5: return True
+            
+            print(_err_invalid)
+            return False
         
+        @check_capture
         def bishop_move(row_i, col_i, row_f, col_f, check=False):
-            if abs(col_f - col_i) == abs(row_f - row_i):
-                if check_capture(place):
-                    commit_move(row_i, col_i, row_f, col_f)
-            else: print(_err_invalid)
+            if abs(col_f - col_i) == abs(row_f - row_i): return True
+            
+            print(_err_invalid)
+            return False
         
+        @check_capture
         def queen_move(row_i, col_i, row_f, col_f, check=False):
             if (
                 (col_i == col_f or row_i == row_f) or
                 abs(col_f - col_i) == abs(row_f - row_i)
-            ):
-                if check_capture(place):
-                    commit_move(row_i, col_i, row_f, col_f)
-            else: print(_err_invalid)
+            ): return True
+            
+            print(_err_invalid)
+            return False
 
+        @check_capture
         def king_move(row_i, col_i, row_f, col_f, check=False):
-            if abs(col_f - col_i) + abs(row_f - row_i) <= 2:
-                if check_capture(place):
-                    commit_move(row_i, col_i, row_f, col_f)
-            else: print(_err_invalid)
+            if abs(col_f - col_i) + abs(row_f - row_i) <= 2: return True
+            
+            print(_err_invalid)
+            return False
+
 
         if self.color == game.turn:
             pos_i = convert(self.pos)
