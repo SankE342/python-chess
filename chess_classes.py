@@ -30,7 +30,7 @@ class Piece():
 
     def move(self, place):
         
-        _err_color = f'WRONG PIECE. MOVE ONLY {game.turn} PIECES'
+        _err_color = f'WRONG PIECE. MOVE ONLY {game.turn.upper()} PIECES'
         _err_invalid = 'INVALID MOVE'
         _err_capture = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
         _err_collision = 'PIECES IN THE WAY'
@@ -107,7 +107,6 @@ class Piece():
             return False
 
         @check_capture
-        @check_collision
         def knight_move(row_i, col_i, row_f, col_f, check=False):
             if (col_f - col_i)**2 + (row_f - row_i)**2 == 5: return True
             
@@ -134,7 +133,6 @@ class Piece():
             return False
 
         @check_capture
-        @check_collision
         def king_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i) + abs(row_f - row_i) <= 2: return True
             
