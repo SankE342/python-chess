@@ -33,13 +33,37 @@ class Piece():
         _err_color = f'WRONG PIECE. MOVE ONLY {game.turn} PIECES'
         _err_invalid = 'INVALID MOVE'
         _err_capture = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
-        
+        _err_collision = 'PIECES IN THE WAY'
+
         def commit_move(row_i, col_i, row_f, col_f):
             self.pos = place
             board.state[row_f, col_f] = self
             board.state[row_i, col_i] = xx0
             game.pass_turn()
             board.show()
+
+        def check_collision(func):
+            def wrapper(row_i, col_i, row_f, col_f):
+                if not func(row_i, col_i, row_f, col_f): return
+
+                row_dis = row_f - row_i
+                col_dis = col_f - col_i
+                
+                def ran(dis):
+                    if dis > 0: return range(1, dis)
+                    else:       return range(-1, dis, -1)
+                
+                for x, y in zip(
+                    (0,)*(col_dis - 1) if row_dis == 0 else ran(row_dis),
+                    (0,)*(row_dis - 1) if col_dis == 0 else ran(col_dis)
+                ):
+                    if board.state[row_i + x, col_i + y] is not xx0: break
+                else: return True
+
+                print(_err_collision)
+                return False
+            
+            return wrapper
 
         def check_capture(func):
             def wrapper(row_i, col_i, row_f, col_f):
@@ -55,29 +79,8 @@ class Piece():
             
             return wrapper
 
-        def check_collision(row_i, col_i, row_f, col_f):
-            row_dis = abs(row_f - row_i)
-            col_dis = abs(col_f - col_i)
-            
-            # row_ran = (0,)*col_dis if (row_dis == 0) else range(1, row_dis)
-            # col_ran = (0,)*row_dis if (col_dis == 0) else range(1, col_dis)
-            
-            # for i, j in (row_ran, col_ran):
-            #     if (board.state[row_i + i, col_i + j] is not xx0): break
-            # else: return True
-            
-            # URGENTE: Pensar en casos para todas las direcciones
-            for x, y in zip(
-                (0,)*(col_dis - 1) if (row_dis == 0) else range(1, row_dis),
-                (0,)*(row_dis - 1) if (col_dis == 0) else range(1, col_dis)
-            ):
-                if (board.state[row_i + x, col_i + y] is not xx0): break
-            else: return True
-
-            return False
-
-
         @check_capture
+        @check_collision
         def pawn_move(row_i, col_i, row_f, col_f, check=False):
             if col_f == col_i and board.state[row_f, col_f] == xx0:
                 if (
@@ -96,6 +99,7 @@ class Piece():
             return False
         
         @check_capture
+        @check_collision
         def rook_move(row_i, col_i, row_f, col_f, check=False):
             if col_i == col_f or row_i == row_f: return True
             
@@ -103,6 +107,7 @@ class Piece():
             return False
 
         @check_capture
+        @check_collision
         def knight_move(row_i, col_i, row_f, col_f, check=False):
             if (col_f - col_i)**2 + (row_f - row_i)**2 == 5: return True
             
@@ -110,6 +115,7 @@ class Piece():
             return False
         
         @check_capture
+        @check_collision
         def bishop_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i) == abs(row_f - row_i): return True
             
@@ -117,6 +123,7 @@ class Piece():
             return False
         
         @check_capture
+        @check_collision
         def queen_move(row_i, col_i, row_f, col_f, check=False):
             if (
                 (col_i == col_f or row_i == row_f) or
@@ -127,6 +134,7 @@ class Piece():
             return False
 
         @check_capture
+        @check_collision
         def king_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i) + abs(row_f - row_i) <= 2: return True
             
@@ -154,7 +162,6 @@ class Game():
     def pass_turn(self):
         if self.turn == 'White': self.turn = 'Black'
         else: self.turn = 'White'
-
 
 # Indexers for piece information
 if True:
