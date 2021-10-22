@@ -18,12 +18,13 @@ class Board():
         return self.state[row, col]
 
 class Piece():
-    def __init__(self, name, color, pos, status='alive'):
+    def __init__(self, name, color, pos, status='alive', special=None):
         self.short = name + color
         self.name = dct_pieces[name]
         self.color = dct_colors[color]
         self.pos = pos
         self.status = status
+        self.special = special
     
     def __repr__(self):
         return str(self.short)
@@ -68,14 +69,16 @@ class Piece():
         def check_capture(func):
             def wrapper(row_i, col_i, row_f, col_f):
                 if not func(row_i, col_i, row_f, col_f): return
-                
+
                 piece = board.state[row_f, col_f]
                 if piece.color != game.turn:
-                    if piece.color != 'None':                
+                    if piece.status != 'empty':                
                         piece.pos, piece.status = 'X0', 'captured'
                     commit_move(row_i, col_i, row_f, col_f)
+                    return True
                 else:
                     print(_err_capture)
+                    return False
             
             return wrapper
 
@@ -84,16 +87,20 @@ class Piece():
         def pawn_move(row_i, col_i, row_f, col_f, check=False):
             if col_f == col_i and board.state[row_f, col_f] == xx0:
                 if (
-                    game.turn == 'White' and 
-                    (row_f + 1 == row_i or row_f + 2 == row_i and row_i == 6) or
-                    game.turn == 'Black' and 
-                    (row_f - 1 == row_i or row_f - 2 == row_i and row_i == 1)
-                ): return True
-            elif (
-                abs(col_f - col_i) == 1 and
-                (game.turn == 'White' and row_f + 1 == row_i or
-                game.turn == 'Black' and row_f - 1 == row_i)
-            ): return True
+                    row_f + _sign == row_i or
+                    row_f + _sign*2 == row_i and row_i in (1, 6)
+                ):
+                    if self.special == 'Double': self.special = None
+                    if abs(row_f - row_i) == 2: self.special = 'Double'
+                    return True
+            elif abs(col_f - col_i) == 1 and row_f + _sign == row_i:
+                if board.state[row_f, col_f].status == 'empty':
+                    pawn_check = board.state[row_f + _sign, col_f]
+                    if pawn_check.special == 'Double':
+                        pawn_check.pos, pawn_check.status = 'X0', 'captured'
+                        board.state[row_f + _sign, col_f] = xx0
+                        return True
+                else: return True
             
             print(_err_invalid)
             return False
@@ -101,7 +108,9 @@ class Piece():
         @check_capture
         @check_collision
         def rook_move(row_i, col_i, row_f, col_f, check=False):
-            if col_i == col_f or row_i == row_f: return True
+            if col_i == col_f or row_i == row_f:
+                if self.special is None: self.special = 'Moved'
+                return True
             
             print(_err_invalid)
             return False
@@ -134,7 +143,9 @@ class Piece():
 
         @check_capture
         def king_move(row_i, col_i, row_f, col_f, check=False):
-            if abs(col_f - col_i) + abs(row_f - row_i) <= 2: return True
+            if abs(col_f - col_i) + abs(row_f - row_i) <= 2:
+                if self.special is None: self.special = 'Moved'
+                return True
             
             print(_err_invalid)
             return False
@@ -155,11 +166,20 @@ class Piece():
 
 class Game():
     def __init__(self):
+        global _sign
+        
         self.turn = 'White'
+        _sign = 1
 
     def pass_turn(self):
-        if self.turn == 'White': self.turn = 'Black'
-        else: self.turn = 'White'
+        global _sign
+        
+        if self.turn == 'White':
+            self.turn = 'Black'
+            _sign = -1
+        else:
+            self.turn = 'White'
+            _sign = 1
 
 # Indexers for piece information
 if True:
@@ -261,5 +281,38 @@ def reset_board(layout='default'):
 game = Game()
 board = Board()
 board.show()
+
+# %%
+
+pW5.move('E4')
+pB1.move('A5')
+
+# %%
+pW5.move('E5')
+pB4.move('D6')
+
+# %%
+
+pW5.move('D6')
+qB1.move('D6')
+
+# %%
+
+pW6.move('F4')
+qB1.move('F6')
+
+# %%
+
+pW6.move('F5')
+nB1.move('A6')
+
+# %%
+
+pW1.move('A3')
+qB1.move('E5')
+
+# %%
+pW1.move('A4')
+pB5.move('E6')
 
 # %%
