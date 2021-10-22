@@ -155,12 +155,16 @@ class Piece():
             pos_i = convert(self.pos)
             pos_f = convert(place)
             
-            if      self.name == 'Pawn':    pawn_move(*pos_i, *pos_f)
-            elif    self.name == 'Knight':  knight_move(*pos_i, *pos_f)
-            elif    self.name == 'Rook':    rook_move(*pos_i, *pos_f)
-            elif    self.name == 'Bishop':  bishop_move(*pos_i, *pos_f)
-            elif    self.name == 'Queen':   queen_move(*pos_i, *pos_f)
-            elif    self.name == 'King':    king_move(*pos_i, *pos_f)
+            dct_moves = {
+                'Pawn':    pawn_move,
+                'Knight':  knight_move,
+                'Rook':    rook_move,
+                'Bishop':  bishop_move,
+                'Queen':   queen_move,
+                'King':    king_move
+            }
+
+            dct_moves[self.name](*pos_i, *pos_f)
 
         else: print(_err_color)
 
@@ -183,11 +187,11 @@ class Game():
 
 # Indexers for piece information
 if True:
-    dctPos = {
+    dct_pos = {
         'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7,
         '8': 0, '7': 1, '6': 2, '5': 3, '4': 4, '3': 5, '2': 6, '1': 7
     }
-    dctInv = {key: value for value, key in list(dctPos.items())[:8]}
+    dct_inv = {key: value for value, key in list(dct_pos.items())[:8]}
 
     dct_pieces = {
         'p': 'Pawn'     , 'r': 'Rook'       , 'n': 'Knight',
@@ -201,54 +205,27 @@ if True:
 if True:
     xx0 = Piece('-', '-', 'X0', status='empty')
 
-    pW1 = Piece('p', 'W', 'A2')
-    pW2 = Piece('p', 'W', 'B2')
-    pW3 = Piece('p', 'W', 'C2')
-    pW4 = Piece('p', 'W', 'D2')
-    pW5 = Piece('p', 'W', 'E2')
-    pW6 = Piece('p', 'W', 'F2')
-    pW7 = Piece('p', 'W', 'G2')
-    pW8 = Piece('p', 'W', 'H2')
+    pW1, pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
+    pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
+    pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
+    pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
+    pW5, pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
+    pW6, pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
+    pW7, pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
+    pW8, pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
 
-    pB1 = Piece('p', 'B', 'A7')
-    pB2 = Piece('p', 'B', 'B7')
-    pB3 = Piece('p', 'B', 'C7')
-    pB4 = Piece('p', 'B', 'D7')
-    pB5 = Piece('p', 'B', 'E7')
-    pB6 = Piece('p', 'B', 'F7')
-    pB7 = Piece('p', 'B', 'G7')
-    pB8 = Piece('p', 'B', 'H7')
+    rW1, rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
+    rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
 
+    nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
+    nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
 
-    rW1 = Piece('r', 'W', 'A1')
-    rW2 = Piece('r', 'W', 'H1')
+    bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
+    bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
 
-    rB1 = Piece('r', 'B', 'A8')
-    rB2 = Piece('r', 'B', 'H8')
+    qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
 
-
-    nW1 = Piece('n', 'W', 'B1')
-    nW2 = Piece('n', 'W', 'G1')
-
-    nB1 = Piece('n', 'B', 'B8')
-    nB2 = Piece('n', 'B', 'G8')
-        
-        
-    bW1 = Piece('b', 'W', 'C1')
-    bW2 = Piece('b', 'W', 'F1')
-
-    bB1 = Piece('b', 'B', 'C8')
-    bB2 = Piece('b', 'B', 'F8')
-
-
-    qW1 = Piece('q', 'W', 'D1')
-
-    qB1 = Piece('q', 'B', 'D8')
-
-
-    kW1 = Piece('k', 'W', 'E1')
-
-    kB1 = Piece('k', 'B', 'E8')
+    kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
 
 def convert(pos):
     '''
@@ -257,9 +234,9 @@ def convert(pos):
     converted into column and the number into row.
     '''
     if type(pos) is str:
-        return dctPos[pos[1]], dctPos[pos[0]]
+        return dct_pos[pos[1]], dct_pos[pos[0]]
     elif type(pos) is tuple:
-        return dctInv[pos[1]] + str(8 - pos[0])
+        return dct_inv[pos[1]] + str(8 - pos[0])
 
 def reset_board(layout='default'):
     if layout == 'default':
