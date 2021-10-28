@@ -12,7 +12,7 @@ move_list = [
 def main():
 
     print(
-        'CHESS!!! - by SankE\nFor additional help, enter "help" as a move'
+        'CHESS!!! - by SankE\nFor additional help, enter "help" as a move\n'
     )
     chess.start_game()
     
