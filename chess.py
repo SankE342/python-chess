@@ -67,8 +67,8 @@ class Piece():
                     else:       return range(-1, dis, -1)
                 
                 for x, y in zip(
-                    (0,)*(col_dis - 1) if row_dis == 0 else ran(row_dis),
-                    (0,)*(row_dis - 1) if col_dis == 0 else ran(col_dis)
+                    (0,)*(abs(col_dis) - 1) if row_dis == 0 else ran(row_dis),
+                    (0,)*(abs(row_dis) - 1) if col_dis == 0 else ran(col_dis)
                 ):
                     if board.state[row_i + x, col_i + y] is not xx0: break
                 else: return True
