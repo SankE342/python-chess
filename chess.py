@@ -322,6 +322,7 @@ def reset_board(layout='default'):
             [pW1, pW2, pW3, pW4, pW5, pW6, pW7, pW8],
             [rW1, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
         ], dtype=object)
+    
     elif layout == 'promote':
         
         pW1, pB1 = Piece('p', 'W', 'X0'), Piece('p', 'B', 'A2')
@@ -355,6 +356,7 @@ def reset_board(layout='default'):
             [pB1, pW2, pW3, pW4, xx0, xx0, xx0, xx0],
             [xx0, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
         ], dtype=object)
+    
     elif layout == 'empty': return np.array([[xx0]*8]*8, dtype=object)
     
 def start_game(layout='default'):
