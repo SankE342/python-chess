@@ -14,23 +14,23 @@ def main():
     print(
         'CHESS!!! - by SankE\nFor additional help, enter "help" as a move\n'
     )
-    chess.start_game('promote')
+    chess.start_game()
     
     run = True
     i = 0
     while run and i < len(move_list):
-        move_str = input(
-        f'Insert a move. {chess.game.turn} plays.\n(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")'
-        )
-        # print(
-        #     f'Insert a move. {chess.game.turn} plays.\n(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")'
+        # move_str = input(
+        # f'Insert a move. {chess.game.turn} plays.\n(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")\n'
         # )
-        # move_str = move_list[i]
+        print(
+            f'Insert a move. {chess.game.turn} plays.\n(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")'
+        )
+        move_str = move_list[i]
         if move_str.lower() == 'exit': break
         chess.move_parser(move_str)
         i += 1
 
-    print('Game finished. Press ENTER to exit.')
+    print('Game finished. Press ENTER to exit.\n')
 
 if __name__ == '__main__':
     main()

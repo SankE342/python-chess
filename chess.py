@@ -17,6 +17,7 @@ class Board():
         row, col = convert(pos)
         return self.state[row, col]
 
+
 class Piece():
     def __init__(self, name, color, pos, status='alive', special=None):
         self.short = name + color
@@ -29,13 +30,13 @@ class Piece():
     def __repr__(self): return str(self.short)
 
     def move(self, place):
-        _err_color      = f'WRONG PIECE. MOVE ONLY {game.turn.upper()} PIECES'
-        _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE'
-        _err_invalid    = 'INVALID MOVE'
-        _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
-        _err_collision  = 'PIECES IN THE WAY'
-        _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
-        _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
+        _err_color      = f'WRONG PIECE. MOVE ONLY {game.turn.upper()} PIECES\n'
+        _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE\n'
+        _err_invalid    = 'INVALID MOVE\n'
+        _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES\n'
+        _err_collision  = 'PIECES IN THE WAY\n'
+        _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS\n'
+        _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN\n'
 
         def commit_move(row_i, col_i, row_f, col_f):
             self.pos = place
@@ -46,10 +47,14 @@ class Piece():
 
         def validate_move(func):
             def wrapper(row_i, col_i, row_f, col_f):
-                if not (row_i == row_f and col_i == col_f):
-                    return func(row_i, col_i, row_f, col_f)
+                if self.color == game.turn:
+                    if not (row_i == row_f and col_i == col_f):
+                        return func(row_i, col_i, row_f, col_f)
+
+                    print(_err_samepos)
+                    return False
                 
-                print(_err_samepos)
+                print(_err_color)
                 return False
 
             return wrapper
@@ -224,23 +229,20 @@ class Piece():
             print(_err_invalid)
             return False
 
-
-        if self.color == game.turn:
-            pos_i = convert(self.pos)
-            pos_f = convert(place)
-            
-            dct_moves = {
+        dct_moves = {
                 'Pawn'      : pawn_move,
                 'Knight'    : knight_move,
                 'Rook'      : rook_move,
                 'Bishop'    : bishop_move,
                 'Queen'     : queen_move,
                 'King'      : king_move
-            }
+        }
 
-            dct_moves[self.name](*pos_i, *pos_f)
+        pos_i = convert(self.pos)
+        pos_f = convert(place)
 
-        else: print(_err_color)
+        dct_moves[self.name](*pos_i, *pos_f)
+
 
 class Game():
     def __init__(self):
@@ -286,7 +288,6 @@ def convert(pos):
 
 # Initializing board and pieces
 xx0 = Piece('-', '-', 'X0', status='empty')
-
 def reset_board(layout='default'):
     if layout == 'default':
 
