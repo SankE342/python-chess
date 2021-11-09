@@ -272,41 +272,6 @@ if True:
 
     dct_colors = {'W': 'White', 'B': 'Black', '-': 'None'}
     
-# Initializing pieces
-if True:
-    xx0 = Piece('-', '-', 'X0', status='empty')
-
-    # pW1, pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
-    pW1, pB1 = Piece('p', 'W', 'X0'), Piece('p', 'B', 'A2')
-    pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
-    pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
-    pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
-    # pW5, pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
-    # pW6, pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
-    # pW7, pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
-    # pW8, pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
-    pW5, pB5 = Piece('p', 'W', 'E7'), Piece('p', 'B', 'X0')
-    pW6, pB6 = Piece('p', 'W', 'F7'), Piece('p', 'B', 'X0')
-    pW7, pB7 = Piece('p', 'W', 'G7'), Piece('p', 'B', 'X0')
-    pW8, pB8 = Piece('p', 'W', 'H7'), Piece('p', 'B', 'X0')
-
-    # rW1, rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
-    rW1, rB1 = Piece('r', 'W', 'X0'), Piece('r', 'B', 'A8')
-    # rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
-    rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'X0')
-
-    nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
-    # nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
-    nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'X0')
-
-    bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
-    # bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
-    bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'X0')
-
-    qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
-
-    # kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
-    kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'X0')
 
 def convert(pos):
     '''
@@ -319,8 +284,33 @@ def convert(pos):
     elif type(pos) is tuple:
         return dct_inv[pos[1]] + str(8 - pos[0])
 
+# Initializing board and pieces
+xx0 = Piece('-', '-', 'X0', status='empty')
+
 def reset_board(layout='default'):
     if layout == 'default':
+
+        pW1, pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
+        pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
+        pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
+        pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
+        pW5, pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
+        pW6, pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
+        pW7, pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
+        pW8, pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
+
+        rW1, rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
+        rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
+
+        nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
+        nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
+
+        bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
+        bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
+
+        qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
+        kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
+
         return np.array([
             [rB1, nB1, bB1, qB1, kB1, bB2, nB2, rB2],
             [pB1, pB2, pB3, pB4, pB5, pB6, pB7, pB8],
@@ -332,6 +322,28 @@ def reset_board(layout='default'):
             [rW1, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
         ], dtype=object)
     elif layout == 'promote':
+        
+        pW1, pB1 = Piece('p', 'W', 'X0'), Piece('p', 'B', 'A2')
+        pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
+        pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
+        pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
+        pW5, pB5 = Piece('p', 'W', 'E7'), Piece('p', 'B', 'X0')
+        pW6, pB6 = Piece('p', 'W', 'F7'), Piece('p', 'B', 'X0')
+        pW7, pB7 = Piece('p', 'W', 'G7'), Piece('p', 'B', 'X0')
+        pW8, pB8 = Piece('p', 'W', 'H7'), Piece('p', 'B', 'X0')
+
+        rW1, rB1 = Piece('r', 'W', 'X0'), Piece('r', 'B', 'A8')
+        rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'X0')
+
+        nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
+        nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'X0')
+
+        bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
+        bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'X0')
+
+        qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
+        kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'X0')
+
         return np.array([
             [rB1, nB1, bB1, qB1, xx0, xx0, xx0, xx0],
             [xx0, pB2, pB3, pB4, pW5, pW6, pW7, pW8],
@@ -342,7 +354,7 @@ def reset_board(layout='default'):
             [pB1, pW2, pW3, pW4, xx0, xx0, xx0, xx0],
             [xx0, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
         ], dtype=object)
-    elif layout == 'empty': return np.array([['--']*8]*8, dtype=object)
+    elif layout == 'empty': return np.array([[xx0]*8]*8, dtype=object)
     
 def start_game(layout='default'):
     global game
