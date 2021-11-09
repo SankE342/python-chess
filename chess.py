@@ -20,23 +20,22 @@ class Board():
 class Piece():
     def __init__(self, name, color, pos, status='alive', special=None):
         self.short = name + color
-        self.name = dct_pieces[name]
+        self.name = dct_names[name]
         self.color = dct_colors[color]
         self.pos = pos
         self.status = status
         self.special = special
     
-    def __repr__(self):
-        return str(self.short)
+    def __repr__(self): return str(self.short)
 
     def move(self, place):
-        
         _err_color      = f'WRONG PIECE. MOVE ONLY {game.turn.upper()} PIECES'
         _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE'
         _err_invalid    = 'INVALID MOVE'
         _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
         _err_collision  = 'PIECES IN THE WAY'
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
+        _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
 
         def commit_move(row_i, col_i, row_f, col_f):
             self.pos = place
@@ -97,23 +96,46 @@ class Piece():
         @check_collision
         @validate_move
         def pawn_move(row_i, col_i, row_f, col_f, check=False):
-            if (target := board.state[row_f, col_f]) == xx0 and col_f == col_i:
+            def promote():
+                while True:
+                    if (
+                        (piece_name := input('Choose a piece [r, n, b, q]:\n')
+                        .lower()) in ('r', 'n', 'b', 'q')
+                    ):
+                        self.__init__(
+                            piece_name, game.turn[0],
+                            self.pos, special='promoted'
+                        )
+                        game.promotions += 1
+                        break
+                    else:
+                        print(_err_promotion)
+
+            if (
+                (target := board.state[row_f, col_f]) == xx0 and
+                col_f == col_i
+            ):
                 if (
-                    row_f + _sign == row_i or
-                    row_f + _sign*2 == row_i and row_i in (1, 6)
+                    row_f + game.sign == row_i or
+                    row_f + game.sign*2 == row_i and row_i in (1, 6)
                 ):
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
+                    if row_f in (0, 7): promote()
                     return True
-            elif abs(col_f - col_i) == 1 and row_f + _sign == row_i:
+            elif abs(col_f - col_i) == 1 and row_f + game.sign == row_i:
                 if target.status == 'empty':
-                    target = board.state[row_f + _sign, col_f]
-                    if target.special == 'Double':
+                    if (
+                        (target := board.state[row_f + game.sign, col_f])
+                        .special == 'Double'
+                    ):
                         target.pos, target.status = 'X0', 'captured'
-                        board.state[row_f + _sign, col_f] = xx0
+                        board.state[row_f + game.sign, col_f] = xx0
                         return True
-                else: return True
-            
+                else:
+                    if row_f in (0, 7): promote()
+                    return True
+
             print(_err_invalid)
             return False
         
@@ -222,20 +244,17 @@ class Piece():
 
 class Game():
     def __init__(self):
-        global _sign
-        
         self.turn = 'White'
-        _sign = 1
+        self.sign = 1
+        self.promotions = 0
 
     def pass_turn(self):
-        global _sign
-        
         if self.turn == 'White':
             self.turn = 'Black'
-            _sign = -1
+            self.sign = -1
         else:
             self.turn = 'White'
-            _sign = 1
+            self.sign = 1
 
 # Indexers for piece information
 if True:
@@ -245,7 +264,7 @@ if True:
     }
     dct_inv = {key: value for value, key in list(dct_pos.items())[:8]}
 
-    dct_pieces = {
+    dct_names = {
         'p': 'Pawn'     , 'r': 'Rook'       , 'n': 'Knight',
         'b': 'Bishop'   , 'q': 'Queen'      , 'k': 'King',
         '-': 'Empty'
@@ -257,27 +276,37 @@ if True:
 if True:
     xx0 = Piece('-', '-', 'X0', status='empty')
 
-    pW1, pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
+    # pW1, pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
+    pW1, pB1 = Piece('p', 'W', 'X0'), Piece('p', 'B', 'A2')
     pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
     pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
     pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
-    pW5, pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
-    pW6, pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
-    pW7, pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
-    pW8, pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
+    # pW5, pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
+    # pW6, pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
+    # pW7, pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
+    # pW8, pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
+    pW5, pB5 = Piece('p', 'W', 'E7'), Piece('p', 'B', 'X0')
+    pW6, pB6 = Piece('p', 'W', 'F7'), Piece('p', 'B', 'X0')
+    pW7, pB7 = Piece('p', 'W', 'G7'), Piece('p', 'B', 'X0')
+    pW8, pB8 = Piece('p', 'W', 'H7'), Piece('p', 'B', 'X0')
 
-    rW1, rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
-    rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
+    # rW1, rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
+    rW1, rB1 = Piece('r', 'W', 'X0'), Piece('r', 'B', 'A8')
+    # rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
+    rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'X0')
 
     nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
-    nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
+    # nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
+    nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'X0')
 
     bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
-    bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
+    # bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
+    bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'X0')
 
     qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
 
-    kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
+    # kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
+    kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'X0')
 
 def convert(pos):
     '''
@@ -293,24 +322,34 @@ def convert(pos):
 def reset_board(layout='default'):
     if layout == 'default':
         return np.array([
-        [rB1, nB1, bB1, qB1, kB1, bB2, nB2, rB2],
-        [pB1, pB2, pB3, pB4, pB5, pB6, pB7, pB8],
-        [xx0]*8,
-        [xx0]*8,
-        [xx0]*8,
-        [xx0]*8,
-        [pW1, pW2, pW3, pW4, pW5, pW6, pW7, pW8],
-        [rW1, nW1, bW1, qW1, kW1, bW2, nW2, rW2],
-    ], dtype=object)
+            [rB1, nB1, bB1, qB1, kB1, bB2, nB2, rB2],
+            [pB1, pB2, pB3, pB4, pB5, pB6, pB7, pB8],
+            [xx0]*8,
+            [xx0]*8,
+            [xx0]*8,
+            [xx0]*8,
+            [pW1, pW2, pW3, pW4, pW5, pW6, pW7, pW8],
+            [rW1, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
+        ], dtype=object)
+    elif layout == 'promote':
+        return np.array([
+            [rB1, nB1, bB1, qB1, xx0, xx0, xx0, xx0],
+            [xx0, pB2, pB3, pB4, pW5, pW6, pW7, pW8],
+            [xx0]*8,
+            [xx0]*8,
+            [xx0]*8,
+            [xx0]*8,
+            [pB1, pW2, pW3, pW4, xx0, xx0, xx0, xx0],
+            [xx0, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
+        ], dtype=object)
+    elif layout == 'empty': return np.array([['--']*8]*8, dtype=object)
     
-    if layout == 'empty': return np.array([['--']*8]*8, dtype=object)
-    
-def start_game():
+def start_game(layout='default'):
     global game
     global board
 
     game = Game()
-    board = Board()
+    board = Board(layout)
     board.show()
 
 def validate(string, Type='pos'):
@@ -323,7 +362,7 @@ def validate(string, Type='pos'):
     elif Type == 'piece':
         if (
             len(string) == 1 and
-            string in list(dct_pieces.keys())[:-1]
+            string in list(dct_names.keys())[:-1]
         ): return True
     else:
         print('ERROR: This function only validates pieces and positions')
@@ -344,13 +383,14 @@ def move_parser(move_str):
         validate(pos_i) and validate(pos_f)
     ): return False
 
-    if (piece := board.check(pos_i)).name == dct_pieces[initial]:
-        return piece.move(pos_f)
+    if (piece := board.check(pos_i)).name == dct_names[initial]:
+        piece.move(pos_f)
+        return True
     else:
         print(f'ERROR: Piece in {pos_i} doesn\'t match input piece')
         return False
 
-# # %%
+# %%
 
 # pW5.move('E4')
 # pB1.move('A5')
