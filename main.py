@@ -14,7 +14,7 @@ def main():
     print(
         'CHESS!!! - by SankE\nFor additional help, enter "help" as a move\n'
     )
-    chess.start_game()
+    game = chess.Game()
     
     run = True
     i = 0
@@ -22,7 +22,7 @@ def main():
         # print(f'Insert a move. {chess.game.turn} plays.')
         # move_str = input('(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")')
 
-        print(f'Insert a move. {chess.game.turn} plays.')
+        print(f'Insert a move. {game.turn} plays.')
         print('(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")')
         move_str = move_list[i]
 
