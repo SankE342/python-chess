@@ -1,6 +1,8 @@
 # %%
 import numpy as np
 
+global output
+output = ''
 
 class Board():
     def __init__(self, layout='default'):
@@ -51,10 +53,12 @@ class Piece():
                     if not (row_i == row_f and col_i == col_f):
                         return func(row_i, col_i, row_f, col_f)
 
-                    print(_err_samepos)
+                    output = _err_samepos
+                    print(output)
                     return False
                 
-                print(_err_color)
+                output = _err_color
+                print(output)
                 return False
 
             return wrapper
@@ -74,10 +78,12 @@ class Piece():
                     (0,)*(abs(col_dis) - 1) if row_dis == 0 else ran(row_dis),
                     (0,)*(abs(row_dis) - 1) if col_dis == 0 else ran(col_dis)
                 ):
-                    if board.state[row_i + x, col_i + y] is not xx0: break
+                    if board.state[row_i + x, col_i + y].status != 'empty':
+                        break
                 else: return True
 
-                print(_err_collision)
+                output = _err_collision
+                print(output)
                 return False
             
             return wrapper
@@ -92,7 +98,8 @@ class Piece():
                     commit_move(row_i, col_i, row_f, col_f)
                     return True
                 else:
-                    print(_err_capture)
+                    output = _err_capture
+                    print(output)
                     return False
             
             return wrapper
@@ -114,7 +121,8 @@ class Piece():
                         game.promotions += 1
                         break
                     else:
-                        print(_err_promotion)
+                        output = _err_promotion
+                        print(output)
 
             if (
                 (target := board.state[row_f, col_f]) == xx0 and
@@ -141,7 +149,8 @@ class Piece():
                     if row_f in (0, 7): promote()
                     return True
 
-            print(_err_invalid)
+            output = _err_invalid
+            print(output)
             return False
         
         @check_capture
@@ -152,7 +161,8 @@ class Piece():
                 if self.special is None: self.special = 'Moved'
                 return True
             
-            print(_err_invalid)
+            output = _err_invalid
+            print(output)
             return False
 
         @check_capture
@@ -160,7 +170,8 @@ class Piece():
         def knight_move(row_i, col_i, row_f, col_f, check=False):
             if (col_f - col_i)**2 + (row_f - row_i)**2 == 5: return True
             
-            print(_err_invalid)
+            output = _err_invalid
+            print(output)
             return False
         
         @check_capture
@@ -169,7 +180,8 @@ class Piece():
         def bishop_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i) == abs(row_f - row_i): return True
             
-            print(_err_invalid)
+            output = _err_invalid
+            print(output)
             return False
         
         @check_capture
@@ -181,7 +193,8 @@ class Piece():
                 abs(col_f - col_i) == abs(row_f - row_i)
             ): return True
             
-            print(_err_invalid)
+            output = _err_invalid
+            print(output)
             return False
 
         @check_capture
@@ -199,8 +212,8 @@ class Piece():
                     (rook := board.state[row_i, col_f + 1]).special is None
                 ):
                     if (
-                        board.state[row_i, col_i + 1] is xx0 and
-                        board.state[row_i, col_i + 2] is xx0
+                        board.state[row_i, col_i + 1].status == 'empty' and
+                        board.state[row_i, col_i + 2].status == 'empty'
                     ):
                         rook.pos = convert((row_i, col_i + 1))
                         board.state[row_i, col_i + 1] = rook
@@ -213,9 +226,9 @@ class Piece():
                     (rook := board.state[row_i, col_f - 2]).special is None
                 ):
                     if (
-                        board.state[row_i, col_i - 1] is xx0 and
-                        board.state[row_i, col_i - 2] is xx0 and
-                        board.state[row_i, col_i - 3] is xx0
+                        board.state[row_i, col_i - 1].status == 'empty' and
+                        board.state[row_i, col_i - 2].status == 'empty' and
+                        board.state[row_i, col_i - 3].status == 'empty'
                     ):
                         rook.pos = convert((row_i, col_i - 1))
                         board.state[row_i, col_i - 1] = rook
@@ -223,10 +236,12 @@ class Piece():
                         rook.special = 'Castled'
                         return True
                 else :
-                    print(_err_castle)
+                    output = _err_castle
+                    print(output)
                     return False
             
-            print(_err_invalid)
+            output = _err_invalid
+            print(output)
             return False
 
         dct_moves = {
@@ -387,7 +402,7 @@ def validate(string, Type='pos'):
 
 def move_parser(move_str):
     try:
-        initial, pos_i, pos_f = move_str.split(' ')
+        initial, pos_i, pos_f = move_str.split()
         initial, pos_i, pos_f = initial.lower(), pos_i.upper(), pos_f.upper()
     except:
         print('Incorrect Syntax. Please try again')

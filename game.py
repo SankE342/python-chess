@@ -1,6 +1,6 @@
 import pygame
-import os
 import chess
+import os
 
 DIMENSIONS = WIDTH, HEIGHT = 600, 800
 ORIGIN = X0, Y0 = 60, 60
@@ -44,22 +44,30 @@ if True:
         }
     }
 
-def pos_pixels(row, col): return 60*(col + 1), 60*(row + 1)
+def pos_pixels(x1, x2, reverse=False):
+    # Converts pixel position in board to index in array
+    if reverse: return x2//60 - 1, x1//60 - 1
+
+    # Converts index in array to pixel position in board
+    return 60*(x2 + 1), 60*(x1 + 1)
 
 def draw_pieces():
     for row, _ in enumerate(chess.board.state):
         for col, piece in enumerate(_):
-            if piece is chess.xx0: continue
+            if piece.status == 'empty': continue
+            
             WINDOW.blit(
-                dct_images[piece.color][piece.name],
-                pos_pixels(row, col)
+                dct_images[piece.color][piece.name], pos_pixels(row, col)
             )
 
 def draw_board():
     WINDOW.fill(WHITE)
     WINDOW.blit(BOARD, (0, 0))
-    # WINDOW.blit(QUEEN_B, (120, 60))
-    # WINDOW.blit(None, (69, 69))
+
+def draw():
+    draw_board()
+    draw_pieces()
+    pygame.display.update()
 
 def main():
     clock = pygame.time.Clock()
@@ -70,10 +78,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: run = False
         
-        draw_board()
-        draw_pieces()
-        pygame.display.update()
-    
+        draw()
+        
     pygame.quit()
 
 if __name__ == '__main__': main()
