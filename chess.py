@@ -5,13 +5,9 @@ global output
 output = ''
 
 class Board():
-    def __init__(self, layout='default'):
-        self.layout = layout
-        self.reset_board()
 
     @classmethod
-    def show(cls):
-        print(cls.state, end='\n\n')
+    def show(cls): print(cls.state, end='\n\n')
 
     @classmethod
     def check(cls, pos):
@@ -93,7 +89,9 @@ class Board():
         elif layout == 'empty' or layout == '' or layout is None:
             cls.state = np.array([[cls.xx0]*8]*8, dtype=object)
 
+
 class Piece():
+    
     positions = {
         'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7,
         '8': 0, '7': 1, '6': 2, '5': 3, '4': 4, '3': 5, '2': 6, '1': 7
@@ -348,15 +346,17 @@ class Piece():
 
 
 class Game():
+
     turn = 'White'
     sign = 1
     promotions = 0
     
-    def __init__(self, layout='default'):
-        global board
+    @classmethod
+    def new_game(cls, layout='default'):
 
-        board = Board(layout)
-        board.show()
+        Board.reset_board(layout)
+
+        return Game(), Board()
 
     @classmethod
     def pass_turn(cls):
@@ -383,18 +383,14 @@ def validate(string, Type='pos'):
     if Type == 'pos':
         if (
             len(string) == 2 and
-            string[0] in list(Piece.positions.keys())[:8] and
-            string[1] in list(Piece.positions.keys())[8:]
+            string[0] in list(Piece.positions)[:8] and
+            string[1] in list(Piece.positions)[8:]
         ): return True
     elif Type == 'piece':
-        if (
-            len(string) == 1 and
-            string in list(Piece.names.keys())[:-1]
-        ): return True
+        if string in list(Piece.names)[:-1]: return True
     else:
         print('ERROR: This function only validates pieces and positions')
     
-    print(f'ERROR: {Type} not written correctly')
     return False
 
 def move_parser(move_str):
