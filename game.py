@@ -1,3 +1,6 @@
+# %%
+
+import numpy as np
 import pygame
 import chess
 import os
@@ -14,7 +17,7 @@ FPS_CAP = 30
 
 DIR = './assets/'
 
-chess.start_game()
+game, board = chess.Game().new_game()
 
 if True:
     BOARD = pygame.image.load(DIR + 'board.png')
@@ -33,7 +36,7 @@ if True:
     QUEEN_B     = pygame.image.load(DIR + 'qB.png')
     KING_B      = pygame.image.load(DIR + 'kB.png')
 
-    dct_images = {
+    images = {
         'White': {
             'Pawn'  : PAWN_W    , 'Rook'    : ROOK_W    , 'Knight'  : KNIGHT_W,
             'Bishop': BISHOP_W  , 'Queen'   : QUEEN_W   , 'King'    : KING_W
@@ -44,25 +47,25 @@ if True:
         }
     }
 
-def pos_pixels(x1, x2, reverse=False):
+def pixel_index(x1, x2, reverse=True):
     # Converts pixel position in board to index in array
     if reverse: return x2//60 - 1, x1//60 - 1
 
     # Converts index in array to pixel position in board
     return 60*(x2 + 1), 60*(x1 + 1)
 
-def draw_pieces():
-    for row, _ in enumerate(chess.board.state):
-        for col, piece in enumerate(_):
-            if piece.status == 'empty': continue
-            
-            WINDOW.blit(
-                dct_images[piece.color][piece.name], pos_pixels(row, col)
-            )
-
 def draw_board():
     WINDOW.fill(WHITE)
     WINDOW.blit(BOARD, (0, 0))
+
+def draw_pieces():
+    for indices, piece in np.ndenumerate(board.state):
+        if piece.status == 'empty': continue
+        
+        WINDOW.blit(
+            images[piece.color][piece.name],
+            pixel_index(*indices, reverse=False)
+        )
 
 def draw():
     draw_board()
@@ -70,16 +73,44 @@ def draw():
     pygame.display.update()
 
 def main():
+    
     clock = pygame.time.Clock()
 
     run = True
+    pix = []
     while run:
         clock.tick(FPS_CAP)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: run = False
+        events = pygame.event.get()
         
+
+        for event in events:
+            if event.type == pygame.QUIT:
+                run = False
+                break
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                dum = pygame.mouse.get_pos()
+
+                if (
+                    (dum[0] < 0 or 540 < dum[0]) or
+                    (dum[1] < 0 or 540 < dum[1])
+                ): continue
+
+                pix.append(dum)
+            
+            if len(pix) == 2:
+                row, col = pixel_index(*pix[0])
+                pos = pixel_index(*pix[1])
+
+                piece = board.state[row, col]
+                piece.move(chess.convert(pos))
+
+                pix = []
+
         draw()
         
     pygame.quit()
 
 if __name__ == '__main__': main()
+
+# %%

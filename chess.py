@@ -6,6 +6,8 @@ output = ''
 
 class Board():
 
+    state = np.empty((8, 8))
+
     @classmethod
     def show(cls): print(cls.state, end='\n\n')
 

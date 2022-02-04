@@ -32,6 +32,7 @@ def main():
         chess.move_parser(move_str)
         i += 1
 
+    print(game)
     input('Game finished. Press ENTER to exit.\n')
 
 if __name__ == '__main__':
