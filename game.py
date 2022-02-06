@@ -5,13 +5,21 @@ import pygame
 import chess
 import os
 
+pygame.init()
+
 DIMENSIONS = WIDTH, HEIGHT = 600, 800
 ORIGIN = X0, Y0 = 60, 60
 
 WINDOW = pygame.display.set_mode(DIMENSIONS)
 pygame.display.set_caption('Python Chess -by SankE')
 
-WHITE = 255, 255, 255
+BLACK   = 0, 0, 0
+RED     = 255, 0, 0
+GREEN   = 0, 255, 0
+BLUE    = 0, 0, 255
+WHITE   = 255, 255, 255
+
+FONT = pygame.font.SysFont('Comic Sans MS', 16)
 
 FPS_CAP = 30
 
@@ -67,9 +75,17 @@ def draw_pieces():
             pixel_index(*indices, reverse=False)
         )
 
+def draw_text(message, output):
+    mes = FONT.render(message, True, BLUE)
+    out = FONT.render(output, True, GREEN)
+
+    WINDOW.blit(mes, (100, 600))
+    WINDOW.blit(out, (100, 700))
+
 def draw():
     draw_board()
     draw_pieces()
+    draw_text('aver', 'será')
     pygame.display.update()
 
 def main():
@@ -77,35 +93,35 @@ def main():
     clock = pygame.time.Clock()
 
     run = True
-    pix = []
+    first_click = True
+    
     while run:
         clock.tick(FPS_CAP)
         events = pygame.event.get()
-        
 
         for event in events:
-            if event.type == pygame.QUIT:
-                run = False
-                break
+            if event.type == pygame.QUIT: run = False
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                dum = pygame.mouse.get_pos()
-
-                if (
-                    (dum[0] < 0 or 540 < dum[0]) or
-                    (dum[1] < 0 or 540 < dum[1])
-                ): continue
-
-                pix.append(dum)
+            if event.type != pygame.MOUSEBUTTONUP: continue
             
-            if len(pix) == 2:
-                row, col = pixel_index(*pix[0])
-                pos = pixel_index(*pix[1])
+            dum = pygame.mouse.get_pos()
 
+            if (
+                (dum[0] < 60 or 540 < dum[0]) or
+                (dum[1] < 60 or 540 < dum[1])
+            ): continue
+
+            if first_click:
+                row, col = pixel_index(*dum)
                 piece = board.state[row, col]
-                piece.move(chess.convert(pos))
+                
+                if piece.status != 'empty': first_click = False
+            else:
+                target = pixel_index(*dum)
+                piece.move(chess.convert(target))
+                
+                first_click = True
 
-                pix = []
 
         draw()
         
