@@ -14,12 +14,13 @@ WINDOW = pygame.display.set_mode(DIMENSIONS)
 pygame.display.set_caption('Python Chess -by SankE')
 
 BLACK   = 0, 0, 0
+GRAY    = 128, 128, 128
 RED     = 255, 0, 0
 GREEN   = 0, 255, 0
 BLUE    = 0, 0, 255
 WHITE   = 255, 255, 255
 
-FONT = pygame.font.SysFont('Comic Sans MS', 16)
+FONT = pygame.font.SysFont('Cascadia Code', 32)
 
 FPS_CAP = 30
 
@@ -63,7 +64,7 @@ def pixel_index(x1, x2, reverse=True):
     return 60*(x2 + 1), 60*(x1 + 1)
 
 def draw_board():
-    WINDOW.fill(WHITE)
+    WINDOW.fill(GRAY)
     WINDOW.blit(BOARD, (0, 0))
 
 def draw_pieces():
@@ -76,16 +77,16 @@ def draw_pieces():
         )
 
 def draw_text(message, output):
-    mes = FONT.render(message, True, BLUE)
-    out = FONT.render(output, True, GREEN)
+    mes = FONT.render(message, True, RED)
+    out = FONT.render(output, True, BLUE)
 
-    WINDOW.blit(mes, (100, 600))
-    WINDOW.blit(out, (100, 700))
+    WINDOW.blit(mes, (30, 600))
+    WINDOW.blit(out, (30, 700))
 
-def draw():
+def draw(message, output):
     draw_board()
     draw_pieces()
-    draw_text('aver', 'será')
+    draw_text(message, output)
     pygame.display.update()
 
 def main():
@@ -94,6 +95,9 @@ def main():
 
     run = True
     first_click = True
+
+    message = f'Make a move. {game.turn} plays'
+    output = ':D'
     
     while run:
         clock.tick(FPS_CAP)
@@ -118,12 +122,11 @@ def main():
                 if piece.status != 'empty': first_click = False
             else:
                 target = pixel_index(*dum)
-                piece.move(chess.convert(target))
+                success, output = piece.move(chess.convert(target))
                 
                 first_click = True
 
-
-        draw()
+        draw(message, output)
         
     pygame.quit()
 

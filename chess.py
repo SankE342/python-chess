@@ -117,13 +117,13 @@ class Piece():
     def __repr__(self): return str(self.short)
 
     def move(self, place):
-        _err_color      = f'WRONG PIECE. MOVE ONLY {Game.turn.upper()} PIECES\n'
-        _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE\n'
-        _err_invalid    = 'INVALID MOVE\n'
-        _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES\n'
-        _err_collision  = 'PIECES IN THE WAY\n'
-        _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS\n'
-        _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN\n'
+        _err_color      = f'WRONG PIECE. MOVE ONLY {Game.turn.upper()} PIECES'
+        _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE'
+        _err_invalid    = 'INVALID MOVE'
+        _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
+        _err_collision  = 'PIECES IN THE WAY'
+        _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
+        _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
 
         output = ''
 
@@ -169,7 +169,7 @@ class Piece():
 
                 output = _err_collision
                 print(output)
-                return False
+                return False, output
             
             return wrapper
 
@@ -222,7 +222,7 @@ class Piece():
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
                     if row_f in (0, 7): promote()
-                    return True, f'{self.name} moved to {place}'
+                    return True, f'{self.color} {self.name} moved to {place}'
             elif abs(col_f - col_i) == 1 and row_f + Game.sign == row_i:
                 if target.status == 'empty':
                     if (
@@ -231,10 +231,10 @@ class Piece():
                     ):
                         target.pos, target.status = 'X0', 'captured'
                         Board.state[row_f + Game.sign, col_f] = Board.xx0
-                        return True, f'{self.name} moved to {place}'
+                        return True, f'{self.color} {self.name} moved to {place}'
                 else:
                     if row_f in (0, 7): promote()
-                    return True, f'{self.name} moved to {place}'
+                    return True, f'{self.color} {self.name} moved to {place}'
 
             output = _err_invalid
             print(output)
@@ -246,7 +246,7 @@ class Piece():
         def rook_move(row_i, col_i, row_f, col_f, check=False):
             if col_i == col_f or row_i == row_f:
                 if self.special is None: self.special = 'Moved'
-                return True, f'{self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
@@ -256,7 +256,7 @@ class Piece():
         @validate_move
         def knight_move(row_i, col_i, row_f, col_f, check=False):
             if (col_f - col_i)**2 + (row_f - row_i)**2 == 5:
-                return True, f'{self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
@@ -267,7 +267,7 @@ class Piece():
         @validate_move
         def bishop_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i) == abs(row_f - row_i):
-                return True, f'{self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
@@ -280,7 +280,7 @@ class Piece():
             if (
                 (col_i == col_f or row_i == row_f) or
                 abs(col_f - col_i) == abs(row_f - row_i)
-            ): return True, f'{self.name} moved to {place}'
+            ): return True, f'{self.color} {self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
@@ -291,7 +291,7 @@ class Piece():
         def king_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i)**2 + abs(row_f - row_i)**2 <= 2:
                 if self.special is None: self.special = 'Moved'
-                return True, f'{self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}'
             elif (
                 self.special is None and
                 row_f == row_i and abs(col_f - col_i) == 2
@@ -309,7 +309,7 @@ class Piece():
                         Board.state[row_i, col_f + 1] = Board.xx0
                         rook.special = 'Castled'
                         self.special = 'Castled'
-                        return True, f'{self.name} moved to {place}'
+                        return True, f'{self.color} {self.name} moved to {place}'
                 elif (
                     col_f < col_i and
                     (rook := Board.state[row_i, col_f - 2]).special is None
@@ -323,7 +323,7 @@ class Piece():
                         Board.state[row_i, col_i - 1] = rook
                         Board.state[row_i, col_f - 2] = Board.xx0
                         rook.special = 'Castled'
-                        return True, f'{self.name} moved to {place}'
+                        return True, f'{self.color} {self.name} moved to {place}'
                 else :
                     output = _err_castle
                     print(output)
