@@ -1,9 +1,6 @@
 # %%
 import numpy as np
 
-global output
-output = ''
-
 class Board():
 
     state = np.empty((8, 8))
@@ -128,6 +125,8 @@ class Piece():
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS\n'
         _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN\n'
 
+        output = ''
+
         def commit_move(row_i, col_i, row_f, col_f):
             self.pos = place
             Board.state[row_f, col_f] = self
@@ -143,24 +142,22 @@ class Piece():
 
                     output = _err_samepos
                     print(output)
-                    return False
+                    return False, output
                 
                 output = _err_color
                 print(output)
-                return False
+                return False, output
 
             return wrapper
 
         def check_collision(func):
             def wrapper(row_i, col_i, row_f, col_f):
-                if not func(row_i, col_i, row_f, col_f): return False
+                success, output = func(row_i, col_i, row_f, col_f)
+                
+                if not success: return False, output
 
                 row_dis = row_f - row_i
                 col_dis = col_f - col_i
-                
-                def ran(dis):
-                    if dis > 0: return range(1, dis)
-                    else:       return range(-1, dis, -1)
                 
                 for x, y in zip(
                     (0,)*(abs(col_dis) - 1) if row_dis == 0 else ran(row_dis),
@@ -168,7 +165,7 @@ class Piece():
                 ):
                     if Board.state[row_i + x, col_i + y].status != 'empty':
                         break
-                else: return True
+                else: return True, output
 
                 output = _err_collision
                 print(output)
@@ -178,17 +175,19 @@ class Piece():
 
         def check_capture(func):
             def wrapper(row_i, col_i, row_f, col_f):
-                if not func(row_i, col_i, row_f, col_f): return False
+                success, output = func(row_i, col_i, row_f, col_f)
+                
+                if not success: return False, output
 
                 if (piece := Board.state[row_f, col_f]).color != Game.turn:
                     if piece.status != 'empty':                
                         piece.pos, piece.status = 'X0', 'captured'
                     commit_move(row_i, col_i, row_f, col_f)
-                    return True
+                    return True, output
                 else:
                     output = _err_capture
                     print(output)
-                    return False
+                    return False, output
             
             return wrapper
 
@@ -223,7 +222,7 @@ class Piece():
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
                     if row_f in (0, 7): promote()
-                    return True
+                    return True, f'{self.name} moved to {place}'
             elif abs(col_f - col_i) == 1 and row_f + Game.sign == row_i:
                 if target.status == 'empty':
                     if (
@@ -232,14 +231,14 @@ class Piece():
                     ):
                         target.pos, target.status = 'X0', 'captured'
                         Board.state[row_f + Game.sign, col_f] = Board.xx0
-                        return True
+                        return True, f'{self.name} moved to {place}'
                 else:
                     if row_f in (0, 7): promote()
-                    return True
+                    return True, f'{self.name} moved to {place}'
 
             output = _err_invalid
             print(output)
-            return False
+            return False, output
         
         @check_capture
         @check_collision
@@ -247,30 +246,32 @@ class Piece():
         def rook_move(row_i, col_i, row_f, col_f, check=False):
             if col_i == col_f or row_i == row_f:
                 if self.special is None: self.special = 'Moved'
-                return True
+                return True, f'{self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
-            return False
+            return False, output
 
         @check_capture
         @validate_move
         def knight_move(row_i, col_i, row_f, col_f, check=False):
-            if (col_f - col_i)**2 + (row_f - row_i)**2 == 5: return True
+            if (col_f - col_i)**2 + (row_f - row_i)**2 == 5:
+                return True, f'{self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
-            return False
+            return False, output
         
         @check_capture
         @check_collision
         @validate_move
         def bishop_move(row_i, col_i, row_f, col_f, check=False):
-            if abs(col_f - col_i) == abs(row_f - row_i): return True
+            if abs(col_f - col_i) == abs(row_f - row_i):
+                return True, f'{self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
-            return False
+            return False, output
         
         @check_capture
         @check_collision
@@ -279,18 +280,18 @@ class Piece():
             if (
                 (col_i == col_f or row_i == row_f) or
                 abs(col_f - col_i) == abs(row_f - row_i)
-            ): return True
+            ): return True, f'{self.name} moved to {place}'
             
             output = _err_invalid
             print(output)
-            return False
+            return False, output
 
         @check_capture
         @validate_move
         def king_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i)**2 + abs(row_f - row_i)**2 <= 2:
                 if self.special is None: self.special = 'Moved'
-                return True
+                return True, f'{self.name} moved to {place}'
             elif (
                 self.special is None and
                 row_f == row_i and abs(col_f - col_i) == 2
@@ -308,7 +309,7 @@ class Piece():
                         Board.state[row_i, col_f + 1] = Board.xx0
                         rook.special = 'Castled'
                         self.special = 'Castled'
-                        return True
+                        return True, f'{self.name} moved to {place}'
                 elif (
                     col_f < col_i and
                     (rook := Board.state[row_i, col_f - 2]).special is None
@@ -322,15 +323,15 @@ class Piece():
                         Board.state[row_i, col_i - 1] = rook
                         Board.state[row_i, col_f - 2] = Board.xx0
                         rook.special = 'Castled'
-                        return True
+                        return True, f'{self.name} moved to {place}'
                 else :
                     output = _err_castle
                     print(output)
-                    return False
+                    return False, output
             
             output = _err_invalid
             print(output)
-            return False
+            return False, output
 
         moves = {
             'Pawn'      : pawn_move,
@@ -344,7 +345,9 @@ class Piece():
         pos_i = convert(self.pos)
         pos_f = convert(place)
 
-        moves[self.name](*pos_i, *pos_f)
+        success, output = moves[self.name](*pos_i, *pos_f)
+
+        return success, output
 
 
 class Game():
@@ -369,6 +372,10 @@ class Game():
             cls.turn = 'White'
             cls.sign = 1
     
+
+def ran(dis):
+    if dis > 0  : return range(1, dis)
+    else        : return range(-1, dis, -1)
 
 def convert(pos):
     '''
@@ -400,19 +407,23 @@ def move_parser(move_str):
         initial, pos_i, pos_f = move_str.split()
         initial, pos_i, pos_f = initial.lower(), pos_i.upper(), pos_f.upper()
     except:
-        print('Incorrect Syntax. Please try again')
-        return False
+        output = 'Incorrect Syntax. Please try again'
+        print(output)
+        return False, output
     
     if not (
         validate(initial, Type='piece') and
         validate(pos_i) and validate(pos_f)
-    ): return False
+    ):
+        output = 'Non valid syntax. Try again'
+        print(output)
+        return False, output
 
     if (piece := Board.check(pos_i)).name == Piece.names[initial]:
-        piece.move(pos_f)
-        return True
+        return piece.move(pos_f)
     else:
-        print(f'ERROR: Piece in {pos_i} doesn\'t match input piece')
-        return False
+        output = f'ERROR: Piece in {pos_i} doesn\'t match input piece'
+        print(output)
+        return False, output
 
 # %%

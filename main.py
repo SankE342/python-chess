@@ -29,7 +29,7 @@ def main():
 
         if move_str.lower() == 'exit': break
         
-        chess.move_parser(move_str)
+        success, output = chess.move_parser(move_str)
         i += 1
 
     print(game)
