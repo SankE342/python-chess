@@ -102,6 +102,7 @@ def main():
     while run:
         clock.tick(FPS_CAP)
         events = pygame.event.get()
+        
 
         for event in events:
             if event.type == pygame.QUIT: run = False
@@ -123,7 +124,8 @@ def main():
             else:
                 target = pixel_index(*dum)
                 success, output = piece.move(chess.convert(target))
-                
+                message = f'Make a move. {game.turn} plays'
+    
                 first_click = True
 
         draw(message, output)
