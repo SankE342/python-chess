@@ -116,6 +116,22 @@ class Piece():
     
     def __repr__(self): return str(self.short)
 
+    def promote(self):
+        while True:
+            if (
+                (piece_name := input('Choose a piece [r, n, b, q]:\n')
+                .lower()) in ('r', 'n', 'b', 'q')
+            ):
+                self.__init__(
+                    piece_name, 'W' if Game.wTurn else 'B',
+                    self.pos, special='promoted'
+                )
+                Game.promotions += 1
+                break
+            else:
+                output = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
+                print(output)
+
     def move(self, place):
         turn, sign = ('White', 1) if Game.wTurn else ('Black', -1)
         output = ''
@@ -126,7 +142,6 @@ class Piece():
         _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
         _err_collision  = 'PIECES IN THE WAY'
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
-        _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
 
         def commit_move(row_i, col_i, row_f, col_f):
             self.pos = place
@@ -199,22 +214,6 @@ class Piece():
         def pawn_move(row_i, col_i, row_f, col_f, check=False):
             flag = False
             
-            def promote():
-                while True:
-                    if (
-                        (piece_name := input('Choose a piece [r, n, b, q]:\n')
-                        .lower()) in ('r', 'n', 'b', 'q')
-                    ):
-                        self.__init__(
-                            piece_name, turn[0],
-                            self.pos, special='promoted'
-                        )
-                        Game.promotions += 1
-                        break
-                    else:
-                        output = _err_promotion
-                        print(output)
-
             if (
                 (target := Board.state[row_f, col_f]).status == 'empty' and
                 col_f == col_i
@@ -225,7 +224,7 @@ class Piece():
                 ):
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
-                    if row_f in (0, 7): promote()
+                    if row_f in (0, 7): self.promote()
                     flag = True
             elif abs(col_f - col_i) == 1 and row_f + sign == row_i:
                 if target.status == 'empty':
@@ -237,7 +236,7 @@ class Piece():
                         Board.state[row_f + sign, col_f] = Board.xx0
                         flag = True
                 else:
-                    if row_f in (0, 7): promote()
+                    if row_f in (0, 7): self.promote()
                     flag = True
 
             if flag:

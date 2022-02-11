@@ -96,7 +96,8 @@ def main():
     run = True
     first_click = True
 
-    message = f'Make a move. {game.turn} plays'
+    turn = "White" if game.wTurn else "Black"
+    message = f'Make a move. {turn} plays.'
     output = ':D'
     
     while run:
@@ -123,7 +124,8 @@ def main():
             else:
                 target = pixel_index(*dum)
                 success, output = piece.move(chess.convert(target))
-                message = f'Make a move. {game.turn} plays'
+                turn = "White" if game.wTurn else "Black"
+                message = f'Make a move. {turn} plays.'
     
                 first_click = True
 
