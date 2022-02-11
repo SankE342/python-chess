@@ -23,7 +23,7 @@ def main():
         # print(f'Insert a move. {chess.game.turn} plays.')
         # move_str = input('(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")')
 
-        print(f'Insert a move. {game.turn} plays.')
+        print(f'Insert a move. {"White" if game.wTurn else "Black"} plays.')
         print('(EXAMPLE: To move a pawn from E2 to E4, type: "p E2 E4")\n')
         move_str = move_list[i]
 

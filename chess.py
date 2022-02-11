@@ -117,15 +117,16 @@ class Piece():
     def __repr__(self): return str(self.short)
 
     def move(self, place):
-        _err_color      = f'WRONG PIECE. MOVE ONLY {Game.turn.upper()} PIECES'
+        turn, sign = ('White', 1) if Game.wTurn else ('Black', -1)
+        output = ''
+        
+        _err_color      = f'WRONG PIECE. MOVE ONLY {turn.upper()} PIECES'
         _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE'
         _err_invalid    = 'INVALID MOVE'
         _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
         _err_collision  = 'PIECES IN THE WAY'
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
         _err_promotion  = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
-
-        output = ''
 
         def commit_move(row_i, col_i, row_f, col_f):
             self.pos = place
@@ -136,7 +137,7 @@ class Piece():
 
         def validate_move(func):
             def wrapper(row_i, col_i, row_f, col_f):
-                if self.color == Game.turn:
+                if self.color == turn:
                     if not (row_i == row_f and col_i == col_f):
                         return func(row_i, col_i, row_f, col_f)
 
@@ -160,8 +161,8 @@ class Piece():
                 col_dis = col_f - col_i
                 
                 for x, y in zip(
-                    (0,)*(abs(col_dis) - 1) if row_dis == 0 else ran(row_dis),
-                    (0,)*(abs(row_dis) - 1) if col_dis == 0 else ran(col_dis)
+                    [0]*(abs(col_dis) - 1) if row_dis == 0 else ran(row_dis),
+                    [0]*(abs(row_dis) - 1) if col_dis == 0 else ran(col_dis)
                 ):
                     if Board.state[row_i + x, col_i + y].status != 'empty':
                         break
@@ -179,9 +180,10 @@ class Piece():
                 
                 if not success: return False, output
 
-                if (piece := Board.state[row_f, col_f]).color != Game.turn:
+                if (piece := Board.state[row_f, col_f]).color != turn:
                     if piece.status != 'empty':                
                         piece.pos, piece.status = 'X0', 'captured'
+                    
                     commit_move(row_i, col_i, row_f, col_f)
                     return True, output
                 else:
@@ -195,6 +197,8 @@ class Piece():
         @check_collision
         @validate_move
         def pawn_move(row_i, col_i, row_f, col_f, check=False):
+            flag = False
+            
             def promote():
                 while True:
                     if (
@@ -202,7 +206,7 @@ class Piece():
                         .lower()) in ('r', 'n', 'b', 'q')
                     ):
                         self.__init__(
-                            piece_name, Game.turn[0],
+                            piece_name, turn[0],
                             self.pos, special='promoted'
                         )
                         Game.promotions += 1
@@ -216,26 +220,31 @@ class Piece():
                 col_f == col_i
             ):
                 if (
-                    row_f + Game.sign == row_i or
-                    row_f + Game.sign*2 == row_i and row_i in (1, 6)
+                    row_f + sign == row_i or
+                    row_f + sign*2 == row_i and row_i in (1, 6)
                 ):
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
                     if row_f in (0, 7): promote()
-                    return True, f'{self.color} {self.name} moved to {place}'
-            elif abs(col_f - col_i) == 1 and row_f + Game.sign == row_i:
+                    flag = True
+            elif abs(col_f - col_i) == 1 and row_f + sign == row_i:
                 if target.status == 'empty':
                     if (
-                        (target := Board.state[row_f + Game.sign, col_f])
+                        (target := Board.state[row_f + sign, col_f])
                         .special == 'Double'
                     ):
                         target.pos, target.status = 'X0', 'captured'
-                        Board.state[row_f + Game.sign, col_f] = Board.xx0
-                        return True, f'{self.color} {self.name} moved to {place}'
+                        Board.state[row_f + sign, col_f] = Board.xx0
+                        flag = True
                 else:
                     if row_f in (0, 7): promote()
-                    return True, f'{self.color} {self.name} moved to {place}'
+                    flag = True
 
+            if flag:
+                if self.special == 'promoted':
+                    return True, f'{self.color} Pawn promoted to {self.name}'
+                return True, f'{self.color} {self.name} moved to {place}'
+            
             output = _err_invalid
             print(output)
             return False, output
@@ -352,25 +361,17 @@ class Piece():
 
 class Game():
 
-    turn = 'White'
-    sign = 1
+    wTurn = True
     promotions = 0
     
     @classmethod
     def new_game(cls, layout='default'):
-
         Board.reset_board(layout)
 
         return Game(), Board()
 
     @classmethod
-    def pass_turn(cls):
-        if cls.turn == 'White':
-            cls.turn = 'Black'
-            cls.sign = -1
-        else:
-            cls.turn = 'White'
-            cls.sign = 1
+    def pass_turn(cls): cls.wTurn = not cls.wTurn
     
 
 def ran(dis):

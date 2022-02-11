@@ -26,7 +26,7 @@ FPS_CAP = 30
 
 DIR = './assets/'
 
-game, board = chess.Game().new_game()
+game, board = chess.Game().new_game(layout='promote')
 
 if True:
     BOARD = pygame.image.load(DIR + 'board.png')
@@ -103,7 +103,6 @@ def main():
         clock.tick(FPS_CAP)
         events = pygame.event.get()
         
-
         for event in events:
             if event.type == pygame.QUIT: run = False
 
