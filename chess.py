@@ -1,5 +1,6 @@
 # %%
 import numpy as np
+from ui_game import promotion_prompt
 
 class Board():
 
@@ -116,21 +117,24 @@ class Piece():
     
     def __repr__(self): return str(self.short)
 
-    def promote(self):
-        while True:
-            if (
-                (piece_name := input('Choose a piece [r, n, b, q]:\n')
-                .lower()) in ('r', 'n', 'b', 'q')
-            ):
-                self.__init__(
-                    piece_name, 'W' if Game.wTurn else 'B',
-                    self.pos, special='promoted'
-                )
-                Game.promotions += 1
-                break
-            else:
-                output = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
-                print(output)
+    def promote(self, console=True):
+        if console:
+            while True:
+                piece_name = input('Choose a piece [r, n, b, q]:\n')
+                
+                if piece_name.lower() in ('r', 'n', 'b', 'q'):
+                    break
+                else:
+                    output = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
+                    print(output)
+        else:
+            piece_name = promotion_prompt('White' if Game.wTurn else 'Black')
+        
+        self.__init__(
+            piece_name, 'W' if Game.wTurn else 'B',
+            self.pos, special='promoted'
+        )
+        Game.promotions += 1
 
     def move(self, place):
         turn, sign = ('White', 1) if Game.wTurn else ('Black', -1)
@@ -224,7 +228,7 @@ class Piece():
                 ):
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
-                    if row_f in (0, 7): self.promote()
+                    if row_f in (0, 7): self.promote(console=False)
                     flag = True
             elif abs(col_f - col_i) == 1 and row_f + sign == row_i:
                 if target.status == 'empty':
@@ -236,7 +240,7 @@ class Piece():
                         Board.state[row_f + sign, col_f] = Board.xx0
                         flag = True
                 else:
-                    if row_f in (0, 7): self.promote()
+                    if row_f in (0, 7): self.promote(console=False)
                     flag = True
 
             if flag:
