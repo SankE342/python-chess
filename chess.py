@@ -1,6 +1,7 @@
 # %%
 import numpy as np
-from ui_game import promotion_prompt
+# from ui_game import promotion_prompt
+
 
 class Board():
 
@@ -20,70 +21,70 @@ class Board():
 
         if layout == 'default':
 
-            pW1, pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
-            pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
-            pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
-            pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
-            pW5, pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
-            pW6, pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
-            pW7, pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
-            pW8, pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
+            cls.pW1, cls.pB1 = Piece('p', 'W', 'A2'), Piece('p', 'B', 'A7')
+            cls.pW2, cls.pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
+            cls.pW3, cls.pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
+            cls.pW4, cls.pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
+            cls.pW5, cls.pB5 = Piece('p', 'W', 'E2'), Piece('p', 'B', 'E7')
+            cls.pW6, cls.pB6 = Piece('p', 'W', 'F2'), Piece('p', 'B', 'F7')
+            cls.pW7, cls.pB7 = Piece('p', 'W', 'G2'), Piece('p', 'B', 'G7')
+            cls.pW8, cls.pB8 = Piece('p', 'W', 'H2'), Piece('p', 'B', 'H7')
 
-            rW1, rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
-            rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
+            cls.rW1, cls.rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
+            cls.rW2, cls.rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'H8')
 
-            nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
-            nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
+            cls.nW1, cls.nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
+            cls.nW2, cls.nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'G8')
 
-            bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
-            bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
+            cls.bW1, cls.bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
+            cls.bW2, cls.bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'F8')
 
-            qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
-            kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
+            cls.qW1, cls.qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
+            cls.kW1, cls.kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'E8')
 
             cls.state = np.array([
-                [rB1, nB1, bB1, qB1, kB1, bB2, nB2, rB2],
-                [pB1, pB2, pB3, pB4, pB5, pB6, pB7, pB8],
+                [cls.rB1, cls.nB1, cls.bB1, cls.qB1, cls.kB1, cls.bB2, cls.nB2, cls.rB2],
+                [cls.pB1, cls.pB2, cls.pB3, cls.pB4, cls.pB5, cls.pB6, cls.pB7, cls.pB8],
                 [cls.xx0]*8,
                 [cls.xx0]*8,
                 [cls.xx0]*8,
                 [cls.xx0]*8,
-                [pW1, pW2, pW3, pW4, pW5, pW6, pW7, pW8],
-                [rW1, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
+                [cls.pW1, cls.pW2, cls.pW3, cls.pW4, cls.pW5, cls.pW6, cls.pW7, cls.pW8],
+                [cls.rW1, cls.nW1, cls.bW1, cls.qW1, cls.kW1, cls.bW2, cls.nW2, cls.rW2]
             ], dtype=object)
         
         elif layout == 'promote':
             
-            pW1, pB1 = Piece('p', 'W', 'X0'), Piece('p', 'B', 'A2')
-            pW2, pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
-            pW3, pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
-            pW4, pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
-            pW5, pB5 = Piece('p', 'W', 'E7'), Piece('p', 'B', 'X0')
-            pW6, pB6 = Piece('p', 'W', 'F7'), Piece('p', 'B', 'X0')
-            pW7, pB7 = Piece('p', 'W', 'G7'), Piece('p', 'B', 'X0')
-            pW8, pB8 = Piece('p', 'W', 'H7'), Piece('p', 'B', 'X0')
+            cls.pW1, cls.pB1 = Piece('p', 'W', 'X0'), Piece('p', 'B', 'A2')
+            cls.pW2, cls.pB2 = Piece('p', 'W', 'B2'), Piece('p', 'B', 'B7')
+            cls.pW3, cls.pB3 = Piece('p', 'W', 'C2'), Piece('p', 'B', 'C7')
+            cls.pW4, cls.pB4 = Piece('p', 'W', 'D2'), Piece('p', 'B', 'D7')
+            cls.pW5, cls.pB5 = Piece('p', 'W', 'E7'), Piece('p', 'B', 'X0')
+            cls.pW6, cls.pB6 = Piece('p', 'W', 'F7'), Piece('p', 'B', 'X0')
+            cls.pW7, cls.pB7 = Piece('p', 'W', 'G7'), Piece('p', 'B', 'X0')
+            cls.pW8, cls.pB8 = Piece('p', 'W', 'H7'), Piece('p', 'B', 'X0')
 
-            rW1, rB1 = Piece('r', 'W', 'X0'), Piece('r', 'B', 'A8')
-            rW2, rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'X0')
+            cls.rW1, cls.rB1 = Piece('r', 'W', 'X0'), Piece('r', 'B', 'A8')
+            cls.rW2, cls.rB2 = Piece('r', 'W', 'H1'), Piece('r', 'B', 'X0')
 
-            nW1, nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
-            nW2, nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'X0')
+            cls.nW1, cls.nB1 = Piece('n', 'W', 'B1'), Piece('n', 'B', 'B8')
+            cls.nW2, cls.nB2 = Piece('n', 'W', 'G1'), Piece('n', 'B', 'X0')
 
-            bW1, bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
-            bW2, bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'X0')
+            cls.bW1, cls.bB1 = Piece('b', 'W', 'C1'), Piece('b', 'B', 'C8')
+            cls.bW2, cls.bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'X0')
 
-            qW1, qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
-            kW1, kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'X0')
+            cls.qW1, cls.qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
+            cls.kW1, cls.kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'X0')
 
             cls.state = np.array([
-                [rB1, nB1, bB1, qB1, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
-                [cls.xx0, pB2, pB3, pB4, pW5, pW6, pW7, pW8],
+                [cls.rB1, cls.nB1, cls.bB1, cls.qB1, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
+                [cls.xx0, cls.pB2, cls.pB3, cls.pB4, cls.pW5, cls.pW6, cls.pW7, cls.pW8],
                 [cls.xx0]*8,
                 [cls.xx0]*8,
                 [cls.xx0]*8,
                 [cls.xx0]*8,
-                [pB1, pW2, pW3, pW4, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
-                [cls.xx0, nW1, bW1, qW1, kW1, bW2, nW2, rW2]
+                [cls.pB1, cls.pW2, cls.pW3, cls.pW4, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
+                [cls.xx0, cls.nW1, cls.bW1, cls.qW1, cls.kW1, cls.bW2, cls.nW2, cls.rW2]
             ], dtype=object)
         
         elif layout == 'empty' or layout == '' or layout is None:
@@ -128,7 +129,7 @@ class Piece():
                     output = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
                     print(output)
         else:
-            piece_name = promotion_prompt('White' if Game.wTurn else 'Black')
+            piece_name = Game.pp('White' if Game.wTurn else 'Black')
         
         self.__init__(
             piece_name, 'W' if Game.wTurn else 'B',
@@ -147,18 +148,19 @@ class Piece():
         _err_collision  = 'PIECES IN THE WAY'
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
 
-        def commit_move(row_i, col_i, row_f, col_f):
-            self.pos = place
-            Board.state[row_f, col_f] = self
-            Board.state[row_i, col_i] = Board.xx0
-            Game.pass_turn()
-            Board.show()
+        def commit_move(row_i, col_i, row_f, col_f, check=False):
+            if not check:
+                self.pos = place
+                Board.state[row_f, col_f] = self
+                Board.state[row_i, col_i] = Board.xx0
+                Game.pass_turn()
+                Board.show()
 
         def validate_move(func):
-            def wrapper(row_i, col_i, row_f, col_f):
+            def wrapper(row_i, col_i, row_f, col_f, check=False):
                 if self.color == turn:
                     if not (row_i == row_f and col_i == col_f):
-                        return func(row_i, col_i, row_f, col_f)
+                        return func(row_i, col_i, row_f, col_f, check)
 
                     output = _err_samepos
                     print(output)
@@ -171,8 +173,8 @@ class Piece():
             return wrapper
 
         def check_collision(func):
-            def wrapper(row_i, col_i, row_f, col_f):
-                success, output = func(row_i, col_i, row_f, col_f)
+            def wrapper(row_i, col_i, row_f, col_f, check=False):
+                success, output = func(row_i, col_i, row_f, col_f, check)
                 
                 if not success: return False, output
 
@@ -194,8 +196,8 @@ class Piece():
             return wrapper
 
         def check_capture(func):
-            def wrapper(row_i, col_i, row_f, col_f):
-                success, output = func(row_i, col_i, row_f, col_f)
+            def wrapper(row_i, col_i, row_f, col_f, check=False):
+                success, output = func(row_i, col_i, row_f, col_f, check)
                 
                 if not success: return False, output
 
@@ -211,6 +213,14 @@ class Piece():
                     return False, output
             
             return wrapper
+        
+        def check_mate(func):
+            def wrapper(row_i, col_i, row_f, col_f, check=False):
+                success, output = func(row_i, col_i, row_f, col_f, check)
+                
+                if not success: return False, output
+
+                king = Board.kW1
 
         @check_capture
         @check_collision
@@ -228,7 +238,7 @@ class Piece():
                 ):
                     if self.special == 'Double': self.special = None
                     if abs(row_f - row_i) == 2: self.special = 'Double'
-                    if row_f in (0, 7): self.promote(console=False)
+                    if row_f in (0, 7): self.promote(console=Game.console)
                     flag = True
             elif abs(col_f - col_i) == 1 and row_f + sign == row_i:
                 if target.status == 'empty':
@@ -240,7 +250,7 @@ class Piece():
                         Board.state[row_f + sign, col_f] = Board.xx0
                         flag = True
                 else:
-                    if row_f in (0, 7): self.promote(console=False)
+                    if row_f in (0, 7): self.promote(console=Game.console)
                     flag = True
 
             if flag:
@@ -366,12 +376,20 @@ class Game():
 
     wTurn = True
     promotions = 0
+
+    @classmethod
+    def __init__(cls, console=True):
+        cls.console = console
+
+        if not console:
+            from ui_game import promotion_prompt
+            cls.pp = promotion_prompt
     
     @classmethod
-    def new_game(cls, layout='default'):
+    def new_game(cls, layout='default', console=True):
         Board.reset_board(layout)
 
-        return Game(), Board()
+        return Game(console), Board()
 
     @classmethod
     def pass_turn(cls): cls.wTurn = not cls.wTurn
