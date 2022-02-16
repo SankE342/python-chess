@@ -90,7 +90,7 @@ def main():
     from numpy import ndenumerate
 
 
-    game, board = chess.Game().new_game(console=False, layout='promote')
+    game, board = chess.Game().new_game(console=False) #, layout='promote')
     clock = pygame.time.Clock()
 
 

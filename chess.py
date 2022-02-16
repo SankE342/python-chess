@@ -1,4 +1,5 @@
 # %%
+from textwrap import wrap
 import numpy as np
 # from ui_game import promotion_prompt
 
@@ -149,14 +150,6 @@ class Piece():
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
         _err_check      = 'KING IN CHECK, TRY ANOTHER MOVE'
 
-        def commit_move(row_i, col_i, row_f, col_f, check=False):
-            if not check:
-                self.pos = place
-                Board.state[row_f, col_f] = self
-                Board.state[row_i, col_i] = Board.xx0
-                Game.pass_turn()
-                Board.show()
-
         def validate_move(func):
             def wrapper(row_i, col_i, row_f, col_f, check=False):
                 if self.color == turn:
@@ -202,22 +195,49 @@ class Piece():
                 
                 if not success: return False, output
 
-                if (piece := Board.state[row_f, col_f]).color != turn:
-                    if piece.status != 'empty':                
-                        piece.pos, piece.status = 'X0', 'captured'
-                    
-                    commit_move(row_i, col_i, row_f, col_f, check)
+                if Board.state[row_f, col_f].color != turn:
                     return True, output
-                else:
-                    output = _err_capture
-                    print(output)
-                    return False, output
+
+                output = _err_capture
+                print(output)
+                return False, output
             
             return wrapper
-        
-        def check_mate(msg):
+
+        def commit_move(func):
+            def wrapper(row_i, col_i, row_f, col_f, check=False):
+                success, output = func(row_i, col_i, row_f, col_f, check)
+
+                if not success: return False, output
+                
+                old_place = self.pos
+                old_piece = Board.state[row_f, col_f]
+                
+                self.pos = place
+                Board.state[row_f, col_f] = self
+                Board.state[row_i, col_i] = Board.xx0
+                
+                if not check_mate():
+                    if old_piece.status != 'empty':                
+                        old_piece.pos, old_piece.status = 'X0', 'captured'
+                    
+                    Game.pass_turn()
+                    Board.show()
+
+                    return True, output
+                else:
+                    self.pos = old_place
+                    Board.state[row_f, col_f] = old_piece
+                    Board.state[row_i, col_i] = self
+
+                output = _err_check
+                print(output)
+                return False, output
+            
+            return wrapper
+
+        def check_mate():
             valid_move = False
-            output = msg
             
             king = Board.kW1 if Game.wTurn else Board.kB1
             k_row, k_col = convert(king.pos)
@@ -262,12 +282,12 @@ class Piece():
                 
                 if valid_move: break
             else:
-                return True, output
+                return True
 
-            output = _err_check
-            return False, output
+            return False
 
 
+        @commit_move
         @check_capture
         @check_collision
         @validate_move
@@ -308,6 +328,7 @@ class Piece():
             print(output)
             return False, output
         
+        @commit_move
         @check_capture
         @check_collision
         @validate_move
@@ -320,6 +341,7 @@ class Piece():
             print(output)
             return False, output
 
+        @commit_move
         @check_capture
         @validate_move
         def knight_move(row_i, col_i, row_f, col_f, check=False):
@@ -330,6 +352,7 @@ class Piece():
             print(output)
             return False, output
         
+        @commit_move
         @check_capture
         @check_collision
         @validate_move
@@ -341,6 +364,7 @@ class Piece():
             print(output)
             return False, output
         
+        @commit_move
         @check_capture
         @check_collision
         @validate_move
@@ -354,6 +378,7 @@ class Piece():
             print(output)
             return False, output
 
+        @commit_move
         @check_capture
         @validate_move
         def king_move(row_i, col_i, row_f, col_f, check=False):
