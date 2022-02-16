@@ -137,7 +137,7 @@ class Piece():
         )
         Game.promotions += 1
 
-    def move(self, place):
+    def move(self, place, check=False):
         turn, sign = ('White', 1) if Game.wTurn else ('Black', -1)
         output = ''
         
@@ -147,6 +147,7 @@ class Piece():
         _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
         _err_collision  = 'PIECES IN THE WAY'
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
+        _err_check      = 'KING IN CHECK, TRY ANOTHER MOVE'
 
         def commit_move(row_i, col_i, row_f, col_f, check=False):
             if not check:
@@ -205,7 +206,7 @@ class Piece():
                     if piece.status != 'empty':                
                         piece.pos, piece.status = 'X0', 'captured'
                     
-                    commit_move(row_i, col_i, row_f, col_f)
+                    commit_move(row_i, col_i, row_f, col_f, check)
                     return True, output
                 else:
                     output = _err_capture
@@ -215,12 +216,64 @@ class Piece():
             return wrapper
         
         def check_mate(func):
-            def wrapper(row_i, col_i, row_f, col_f, check=False):
-                success, output = func(row_i, col_i, row_f, col_f, check)
-                
+            def wrapper(*args, **kwargs):
+                success, output = func(*args, **kwargs)
+
                 if not success: return False, output
 
-                king = Board.kW1
+                valid_move = False
+                
+                king = Board.kW1 if Game.wTurn else Board.kB1
+                k_row, k_col = convert(king.pos)
+
+                horse_pos = [
+                    (k_row + 1, k_col + 2), (k_row + 2, k_col + 1),
+                    (k_row - 1, k_col + 2), (k_row - 2, k_col + 1),
+                    (k_row + 1, k_col - 2), (k_row + 2, k_col - 1),
+                    (k_row - 1, k_col - 2), (k_row - 2, k_col - 1)
+                ]
+
+                horse_iterable = []
+
+                for row, col in horse_pos:
+                    if row in range(8) and col in range(8):
+                        horse_iterable.append((row, col))
+
+                iterables = [
+                    zip( range(k_row + 1, 8), [k_col]*7 ),                      # Down
+                    zip( range(k_row - 1, -1, -1), [k_col]*7 ),                 # Up
+                    zip( range(k_col + 1, 8), [k_row]*7 ),                      # Right
+                    zip( range(k_col - 1, -1, -1), [k_row]*7 ),                 # Left
+
+                    zip( range(k_row + 1, 8), range(k_col + 1, 8) ),            # Down Right
+                    zip( range(k_row - 1, -1, -1), range(k_col + 1, 8) ),       # Up Right
+                    zip( range(k_row + 1, 8), range(k_col - 1, -1, -1) ),       # Down Left
+                    zip( range(k_row - 1, -1, -1), range(k_col - 1, -1, -1) ),  # Up Left
+
+                    horse_iterable
+                ]
+
+                for iterable in iterables:
+                    for row, col in iterable:
+                        piece = Board.state[row, col]
+                        
+                        if piece.status == 'empty': continue
+                        if piece.color == king.color: break
+
+                        Game.pass_turn()
+                        valid_move, _ = piece.move(king.pos, check=True)
+                        Game.pass_turn()
+
+                        if valid_move: break
+                    
+                    if valid_move: break
+                else:
+                    return True, output
+
+                output = _err_check
+                return False, output
+
+            return wrapper
 
         @check_capture
         @check_collision
@@ -367,7 +420,7 @@ class Piece():
         pos_i = convert(self.pos)
         pos_f = convert(place)
 
-        success, output = moves[self.name](*pos_i, *pos_f)
+        success, output = moves[self.name](*pos_i, *pos_f, check)
 
         return success, output
 
