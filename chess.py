@@ -87,7 +87,25 @@ class Board():
                 [cls.pB1, cls.pW2, cls.pW3, cls.pW4, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
                 [cls.xx0, cls.nW1, cls.bW1, cls.qW1, cls.kW1, cls.bW2, cls.nW2, cls.rW2]
             ], dtype=object)
-        
+
+        elif layout == 'check1':
+            
+            cls.rW1, cls.rB1 = Piece('r', 'W', 'A1'), Piece('r', 'B', 'A8')
+            cls.rW2, cls.rB2 = Piece('r', 'W', 'H3'), Piece('r', 'B', 'H1')
+
+            cls.kW1, cls.kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'C2')
+
+            cls.state = np.array([
+                [cls.rB1, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
+                [cls.xx0]*8,
+                [cls.xx0]*8,
+                [cls.xx0]*8,
+                [cls.xx0]*8,
+                [cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.rW2],
+                [cls.xx0, cls.xx0, cls.kB1, cls.xx0, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
+                [cls.rW1, cls.xx0, cls.xx0, cls.xx0, cls.kW1, cls.xx0, cls.xx0, cls.rB2]
+            ], dtype=object)
+
         elif layout == 'empty' or layout == '' or layout is None:
             cls.state = np.array([[cls.xx0]*8]*8, dtype=object)
 
@@ -218,10 +236,16 @@ class Piece():
                 Board.state[row_i, col_i] = Board.xx0
                 
                 if not check_mate():
-                    if old_piece.status != 'empty':                
+                    if old_piece.status != 'empty' and not check:                
                         old_piece.pos, old_piece.status = 'X0', 'captured'
                     
                     if not check: Game.pass_turn()
+                    
+                    if check:
+                        self.pos = old_place
+                        Board.state[row_f, col_f] = old_piece
+                        Board.state[row_i, col_i] = self
+
                     Board.show()
 
                     return True, output
