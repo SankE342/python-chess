@@ -221,7 +221,7 @@ class Piece():
                     if old_piece.status != 'empty':                
                         old_piece.pos, old_piece.status = 'X0', 'captured'
                     
-                    Game.pass_turn()
+                    if not check: Game.pass_turn()
                     Board.show()
 
                     return True, output
@@ -254,17 +254,17 @@ class Piece():
                     horse_iterable.append((row, col))
 
             iterables = [
-                zip( range(k_row + 1, 8), [k_col]*7 ),                      # Down
-                zip( range(k_row - 1, -1, -1), [k_col]*7 ),                 # Up
-                zip( range(k_col + 1, 8), [k_row]*7 ),                      # Right
-                zip( range(k_col - 1, -1, -1), [k_row]*7 ),                 # Left
+                list(zip(range(k_row + 1, 8), [k_col]*7)),                      # Down
+                list(zip(range(k_row - 1, -1, -1), [k_col]*7)),                 # Up
+                list(zip([k_row]*7, range(k_col + 1, 8))),                      # Right
+                list(zip([k_row]*7, range(k_col - 1, -1, -1))),                 # Left
 
-                zip( range(k_row + 1, 8), range(k_col + 1, 8) ),            # Down Right
-                zip( range(k_row - 1, -1, -1), range(k_col + 1, 8) ),       # Up Right
-                zip( range(k_row + 1, 8), range(k_col - 1, -1, -1) ),       # Down Left
-                zip( range(k_row - 1, -1, -1), range(k_col - 1, -1, -1) ),  # Up Left
+                list(zip(range(k_row + 1, 8), range(k_col + 1, 8))),            # Down Right
+                list(zip(range(k_row - 1, -1, -1), range(k_col + 1, 8))),       # Up Right
+                list(zip(range(k_row + 1, 8), range(k_col - 1, -1, -1))),       # Down Left
+                list(zip(range(k_row - 1, -1, -1), range(k_col - 1, -1, -1))),  # Up Left
 
-                horse_iterable
+                horse_iterable                                                  # Horse
             ]
 
             for iterable in iterables:
@@ -282,9 +282,9 @@ class Piece():
                 
                 if valid_move: break
             else:
-                return True
+                return False
 
-            return False
+            return True
 
 
         @commit_move
