@@ -75,11 +75,11 @@ class Board():
             cls.bW2, cls.bB2 = Piece('b', 'W', 'F1'), Piece('b', 'B', 'X0')
 
             cls.qW1, cls.qB1 = Piece('q', 'W', 'D1'), Piece('q', 'B', 'D8')
-            cls.kW1, cls.kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'X0')
+            cls.kW1, cls.kB1 = Piece('k', 'W', 'E1'), Piece('k', 'B', 'A7')
 
             cls.state = np.array([
                 [cls.rB1, cls.nB1, cls.bB1, cls.qB1, cls.xx0, cls.xx0, cls.xx0, cls.xx0],
-                [cls.xx0, cls.pB2, cls.pB3, cls.pB4, cls.pW5, cls.pW6, cls.pW7, cls.pW8],
+                [cls.kB1, cls.pB2, cls.pB3, cls.pB4, cls.pW5, cls.pW6, cls.pW7, cls.pW8],
                 [cls.xx0]*8,
                 [cls.xx0]*8,
                 [cls.xx0]*8,
