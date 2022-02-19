@@ -246,6 +246,11 @@ class Piece():
                         Board.state[row_f, col_f] = old_piece
                         Board.state[row_i, col_i] = self
 
+                    # if self.special == 'promoted':
+                    #     self.__init__(
+                    #         'p', 'W' if Game.wTurn else 'B',
+                    #         self.pos)
+
                     Board.show()
 
                     return True, output
@@ -253,6 +258,11 @@ class Piece():
                     self.pos = old_place
                     Board.state[row_f, col_f] = old_piece
                     Board.state[row_i, col_i] = self
+
+                    if self.special == 'promoted':
+                        self.__init__(
+                            'p', 'W' if Game.wTurn else 'B',
+                            self.pos)
 
                 output = _err_check
                 print(output)
