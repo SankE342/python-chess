@@ -228,6 +228,8 @@ class Piece():
 
                 if not success: return False, output
                 
+                if check: return True, output
+
                 old_place = self.pos
                 old_piece = Board.state[row_f, col_f]
                 
@@ -236,22 +238,13 @@ class Piece():
                 Board.state[row_i, col_i] = Board.xx0
                 
                 if not check_mate():
-                    if old_piece.status != 'empty' and not check:                
+                    if old_piece.status != 'empty':                
                         old_piece.pos, old_piece.status = 'X0', 'captured'
                     
-                    if not check: Game.pass_turn()
-                    
-                    if check:
-                        self.pos = old_place
-                        Board.state[row_f, col_f] = old_piece
-                        Board.state[row_i, col_i] = self
-
-                    # if self.special == 'promoted':
-                    #     self.__init__(
-                    #         'p', 'W' if Game.wTurn else 'B',
-                    #         self.pos)
-
+                    Game.pass_turn()
                     Board.show()
+
+                    if self.special == 'promoted': self.special = None
 
                     return True, output
                 else:
@@ -336,9 +329,13 @@ class Piece():
                     row_f + sign == row_i or
                     row_f + sign*2 == row_i and row_i in (1, 6)
                 ):
-                    if self.special == 'Double': self.special = None
+                    if self.special == 'Double' and not check:
+                        self.special = None
+                    
                     if abs(row_f - row_i) == 2: self.special = 'Double'
+                    
                     if row_f in (0, 7): self.promote(console=Game.console)
+                    
                     flag = True
             elif abs(col_f - col_i) == 1 and row_f + sign == row_i:
                 if target.status == 'empty':
@@ -356,6 +353,7 @@ class Piece():
             if flag:
                 if self.special == 'promoted':
                     return True, f'{self.color} Pawn promoted to {self.name}'
+                
                 return True, f'{self.color} {self.name} moved to {place}'
             
             output = _err_invalid
@@ -368,7 +366,9 @@ class Piece():
         @validate_move
         def rook_move(row_i, col_i, row_f, col_f, check=False):
             if col_i == col_f or row_i == row_f:
-                if self.special is None: self.special = 'Moved'
+                if self.special is None and not check:
+                    self.special = 'Moved'
+                
                 return True, f'{self.color} {self.name} moved to {place}'
             
             output = _err_invalid
@@ -417,10 +417,12 @@ class Piece():
         @validate_move
         def king_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i)**2 + abs(row_f - row_i)**2 <= 2:
-                if self.special is None: self.special = 'Moved'
+                if self.special is None and not check:
+                    self.special = 'Moved'
+                
                 return True, f'{self.color} {self.name} moved to {place}'
             elif (
-                self.special is None and
+                self.special is None and not check and
                 row_f == row_i and abs(col_f - col_i) == 2
             ):
                 if (
@@ -436,11 +438,9 @@ class Piece():
                         Board.state[row_i, col_f + 1] = Board.xx0
                         rook.special = 'Castled'
                         self.special = 'Castled'
+                        
                         return True, f'{self.color} {self.name} moved to {place}'
-                elif (
-                    col_f < col_i and
-                    (rook := Board.state[row_i, col_f - 2]).special is None
-                ):
+                elif (rook := Board.state[row_i, col_f - 2]).special is None:
                     if (
                         Board.state[row_i, col_i - 1].status == 'empty' and
                         Board.state[row_i, col_i - 2].status == 'empty' and
@@ -450,6 +450,7 @@ class Piece():
                         Board.state[row_i, col_i - 1] = rook
                         Board.state[row_i, col_f - 2] = Board.xx0
                         rook.special = 'Castled'
+                        
                         return True, f'{self.color} {self.name} moved to {place}'
                 else :
                     output = _err_castle
