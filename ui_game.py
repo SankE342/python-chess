@@ -20,7 +20,9 @@ BLUE    = 0, 0, 255
 YELLOW  = 255, 255, 0
 WHITE   = 255, 255, 255
 
-FONT = pygame.font.SysFont('Cascadia Code', 32)
+FONT_SIZE = 32
+FONT_TYPE = 'Cascadia Code'
+FONT = pygame.font.SysFont(FONT_TYPE, FONT_SIZE)
 
 FPS_CAP = 30
 
@@ -122,12 +124,15 @@ def main():
                 pix_to_idx(*indices, reverse=True)
             )
 
-    def draw_text(message, output):
-        mes = FONT.render(message, True, RED)
-        out = FONT.render(output, True, BLUE)
+    def draw_multilines(text, x=0, y=0, font_size=FONT_SIZE, color=BLACK):
+        lines = text.split('\n')
+        for i, line in enumerate(lines):
+            t = FONT.render(line, True, color)
+            WINDOW.blit(t, (x, y + font_size*i))
 
-        WINDOW.blit(mes, (30, 600))
-        WINDOW.blit(out, (30, 700))
+    def draw_text(message, output):
+        draw_multilines(message, *(30, 600), color=GREEN)
+        draw_multilines(output, *(30, 700), color=BLUE)
 
     def draw(message, output, hl_pos=None, check=False):
         draw_board()

@@ -150,7 +150,7 @@ class Piece():
                 if piece_name.lower() in ('r', 'n', 'b', 'q'):
                     break
                 else:
-                    output = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN'
+                    output = 'YOU CAN\'T PROMOTE TO THAT PIECE. TRY AGAIN.\n'
                     print(output)
         else:
             piece_name = Game.pp('White' if Game.wTurn else 'Black')
@@ -166,15 +166,15 @@ class Piece():
         output = ''
         check_flag = False
         
-        _err_color      = f'WRONG PIECE. MOVE ONLY {turn.upper()} PIECES'
-        _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE'
-        _err_invalid    = 'INVALID MOVE'
-        _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES'
-        _err_collision  = 'PIECES IN THE WAY'
-        _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
-        _err_check      = 'KING IN CHECK, TRY ANOTHER MOVE'
+        _err_color      = f'WRONG PIECE. MOVE ONLY {turn.upper()} PIECES.\n'
+        _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE.\n'
+        _err_invalid    = 'INVALID MOVE.\n'
+        _err_capture    = 'YOU CAN\'T CAPTURE YOUR OWN PIECES.\n'
+        _err_collision  = 'PIECES IN THE WAY.\n'
+        _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS.\n'
+        _err_check      = 'KING IN CHECK, TRY ANOTHER MOVE.\n'
 
-        _war_check      = '. YOUR KING NOW IN CHECK'
+        _war_check      = 'YOUR KING NOW IN CHECK.\n'
 
         def validate_move(func):
             def wrapper(row_i, col_i, row_f, col_f, check=False):
@@ -336,32 +336,34 @@ class Piece():
                     row_f + sign == row_i or
                     row_f + sign*2 == row_i and row_i in (1, 6)
                 ):
-                    if self.special == 'Double' and not check:
+                    if self.special == 'double' and not check:
                         self.special = None
                     
-                    if abs(row_f - row_i) == 2: self.special = 'Double'
+                    if abs(row_f - row_i) == 2: self.special = 'double'
                     
-                    if row_f in (0, 7): self.promote(console=Game.console)
+                    if not check and row_f in (0, 7):
+                        self.promote(console=Game.console)
                     
                     flag = True
             elif abs(col_f - col_i) == 1 and row_f + sign == row_i:
                 if target.status == 'empty':
                     if (
                         (target := Board.state[row_f + sign, col_f])
-                        .special == 'Double'
+                        .color != self.color and target.special == 'double'
                     ):
                         target.pos, target.status = 'X0', 'captured'
                         Board.state[row_f + sign, col_f] = Board.xx0
                         flag = True
                 else:
-                    if row_f in (0, 7): self.promote(console=Game.console)
+                    if not check and row_f in (0, 7):
+                        self.promote(console=Game.console)
                     flag = True
 
             if flag:
                 if self.special == 'promoted':
-                    return True, f'{self.color} Pawn promoted to {self.name}'
+                    return True, f'{self.color} Pawn promoted to {self.name}.\n'
                 
-                return True, f'{self.color} {self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}.\n'
             
             output = _err_invalid
             print(output)
@@ -376,7 +378,7 @@ class Piece():
                 if self.special is None and not check:
                     self.special = 'Moved'
                 
-                return True, f'{self.color} {self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}.\n'
             
             output = _err_invalid
             print(output)
@@ -387,7 +389,7 @@ class Piece():
         @validate_move
         def knight_move(row_i, col_i, row_f, col_f, check=False):
             if (col_f - col_i)**2 + (row_f - row_i)**2 == 5:
-                return True, f'{self.color} {self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}.\n'
             
             output = _err_invalid
             print(output)
@@ -399,7 +401,7 @@ class Piece():
         @validate_move
         def bishop_move(row_i, col_i, row_f, col_f, check=False):
             if abs(col_f - col_i) == abs(row_f - row_i):
-                return True, f'{self.color} {self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}.\n'
             
             output = _err_invalid
             print(output)
@@ -413,7 +415,7 @@ class Piece():
             if (
                 (col_i == col_f or row_i == row_f) or
                 abs(col_f - col_i) == abs(row_f - row_i)
-            ): return True, f'{self.color} {self.name} moved to {place}'
+            ): return True, f'{self.color} {self.name} moved to {place}.\n'
             
             output = _err_invalid
             print(output)
@@ -427,7 +429,7 @@ class Piece():
                 if self.special is None and not check:
                     self.special = 'Moved'
                 
-                return True, f'{self.color} {self.name} moved to {place}'
+                return True, f'{self.color} {self.name} moved to {place}.\n'
             elif (
                 self.special is None and not check and
                 row_f == row_i and abs(col_f - col_i) == 2
@@ -446,7 +448,7 @@ class Piece():
                         rook.special = 'Castled'
                         self.special = 'Castled'
                         
-                        return True, f'{self.color} {self.name} moved to {place}'
+                        return True, f'{self.color} {self.name} moved to {place}.\n'
                 elif (rook := Board.state[row_i, col_f - 2]).special is None:
                     if (
                         Board.state[row_i, col_i - 1].status == 'empty' and
@@ -458,7 +460,7 @@ class Piece():
                         Board.state[row_i, col_f - 2] = Board.xx0
                         rook.special = 'Castled'
                         
-                        return True, f'{self.color} {self.name} moved to {place}'
+                        return True, f'{self.color} {self.name} moved to {place}.\n'
                 else :
                     output = _err_castle
                     print(output)
@@ -484,7 +486,7 @@ class Piece():
 
         if success and self.special == 'promoted': self.special = None
 
-        if check_mate(attacking=True): output += _war_check
+        if not check and check_mate(attacking=True): output += _war_check
 
         return success, output
 
@@ -537,7 +539,7 @@ def validate(string, Type='pos'):
     elif Type == 'piece':
         if string in list(Piece.names)[:-1]: return True
     else:
-        print('ERROR: This function only validates pieces and positions')
+        print('ERROR: This function only validates pieces and positions.\n')
     
     return False
 
@@ -546,7 +548,7 @@ def move_parser(move_str):
         initial, pos_i, pos_f = move_str.split()
         initial, pos_i, pos_f = initial.lower(), pos_i.upper(), pos_f.upper()
     except:
-        output = 'Incorrect Syntax. Please try again'
+        output = 'Incorrect Syntax. Please try again.\n'
         print(output)
         return False, output
     
@@ -554,14 +556,14 @@ def move_parser(move_str):
         validate(initial, Type='piece') and
         validate(pos_i) and validate(pos_f)
     ):
-        output = 'Non valid syntax. Try again'
+        output = 'Non valid syntax. Try again.\n'
         print(output)
         return False, output
 
     if (piece := Board.check(pos_i)).name == Piece.names[initial]:
         return piece.move(pos_f)
     else:
-        output = f'ERROR: Piece in {pos_i} doesn\'t match input piece'
+        output = f'ERROR: Piece in {pos_i} doesn\'t match input piece.\n'
         print(output)
         return False, output
 
