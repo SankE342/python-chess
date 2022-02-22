@@ -1,6 +1,8 @@
 # %%
 
+from lib2to3.pytree import convert
 import pygame
+
 
 pygame.init()
 pygame.display.set_caption('Python Chess -by SankE')
@@ -15,6 +17,7 @@ GRAY    = 128, 128, 128
 RED     = 255, 0, 0
 GREEN   = 0, 255, 0
 BLUE    = 0, 0, 255
+YELLOW  = 255, 255, 0
 WHITE   = 255, 255, 255
 
 FONT = pygame.font.SysFont('Cascadia Code', 32)
@@ -52,10 +55,10 @@ IMAGES = {
 
 
 def promotion_prompt(color):
-    WINDOW.blit(IMAGES[color]['Queen'], (180, 0))
-    WINDOW.blit(IMAGES[color]['Rook'], (240, 0))
-    WINDOW.blit(IMAGES[color]['Bishop'], (300, 0))
-    WINDOW.blit(IMAGES[color]['Knight'], (360, 0))
+    WINDOW.blit(IMAGES[color]['Queen']  , (180, 0))
+    WINDOW.blit(IMAGES[color]['Rook']   , (240, 0))
+    WINDOW.blit(IMAGES[color]['Bishop'] , (300, 0))
+    WINDOW.blit(IMAGES[color]['Knight'] , (360, 0))
 
     pygame.display.update()
 
@@ -77,12 +80,12 @@ def promotion_prompt(color):
             if dum[0] <= 360: return 'b'
             if dum[0] <= 420: return 'n'
 
-def pixel_index(x1, x2, reverse=True):
-    # Converts pixel position in board to index in array
-    if reverse: return x2//60 - 1, x1//60 - 1
-
+def pix_to_idx(x1, x2, reverse=False):
     # Converts index in array to pixel position in board
-    return 60*(x2 + 1), 60*(x1 + 1)
+    if reverse: return 60*(x2 + 1), 60*(x1 + 1)
+
+    # Converts pixel position in board to index in array
+    return x2//60 - 1, x1//60 - 1
 
 def main():
     
@@ -90,13 +93,25 @@ def main():
     from numpy import ndenumerate
 
 
-    game, board = chess.Game().new_game(console=False, layout='promote')
+    game, board = chess.Game().new_game(console=False)
+    # game, board = chess.Game().new_game(console=False, layout='promote')
     clock = pygame.time.Clock()
 
 
     def draw_board():
         WINDOW.fill(GRAY)
         WINDOW.blit(BOARD, (0, 0))
+    
+    def draw_highlights(pos, check=False):
+        if pos:
+            color = BLUE if game.wTurn else RED
+            pygame.draw.rect(WINDOW, color, pygame.Rect(*pos, 60, 60))
+
+        if check:
+            king = board.kW1 if game.wTurn else board.kB1
+            king_pos = pix_to_idx(*chess.convert(king.pos), reverse=True)
+
+            pygame.draw.rect(WINDOW, YELLOW, pygame.Rect(*king_pos, 60, 60))
 
     def draw_pieces():
         for indices, piece in ndenumerate(board.state):
@@ -104,7 +119,7 @@ def main():
             
             WINDOW.blit(
                 IMAGES[piece.color][piece.name],
-                pixel_index(*indices, reverse=False)
+                pix_to_idx(*indices, reverse=True)
             )
 
     def draw_text(message, output):
@@ -114,21 +129,23 @@ def main():
         WINDOW.blit(mes, (30, 600))
         WINDOW.blit(out, (30, 700))
 
-    def draw(message, output):
+    def draw(message, output, hl_pos=None, check=False):
         draw_board()
+        draw_highlights(hl_pos, check)
         draw_pieces()
         draw_text(message, output)
         pygame.display.update()
 
 
-    run = True
-    first_click = True
-
     turn = "White" if game.wTurn else "Black"
     message = f'Make a move. {turn} plays.'
     output = ':D'
+    hl_pos = None
+    check = False
 
-    
+
+    run = True
+    first_click = True
     while run:
         clock.tick(FPS_CAP)
         events = pygame.event.get()
@@ -146,19 +163,24 @@ def main():
             ): continue
 
             if first_click:
-                row, col = pixel_index(*dum)
+                row, col = pix_to_idx(*dum)
                 piece = board.state[row, col]
                 
+                hl_pos = pix_to_idx(row, col, reverse=True)
                 if piece.status != 'empty': first_click = False
+                
             else:
-                target = pixel_index(*dum)
+                target = pix_to_idx(*dum)
                 success, output = piece.move(chess.convert(target))
                 turn = "White" if game.wTurn else "Black"
                 message = f'Make a move. {turn} plays.'
-    
-                first_click = True
 
-        draw(message, output)
+                hl_pos = None
+                first_click = True
+                if 'NOW IN CHECK' in output: check = True
+                else: check = False
+
+        draw(message, output, hl_pos, check)
         
     pygame.quit()
 

@@ -106,6 +106,11 @@ class Board():
                 [cls.rW1, cls.xx0, cls.xx0, cls.xx0, cls.kW1, cls.xx0, cls.xx0, cls.rB2]
             ], dtype=object)
 
+        elif layout == 'check2':
+            pass
+
+            
+
         elif layout == 'empty' or layout == '' or layout is None:
             cls.state = np.array([[cls.xx0]*8]*8, dtype=object)
 
@@ -159,6 +164,7 @@ class Piece():
     def move(self, place, check=False):
         turn, sign = ('White', 1) if Game.wTurn else ('Black', -1)
         output = ''
+        check_flag = False
         
         _err_color      = f'WRONG PIECE. MOVE ONLY {turn.upper()} PIECES'
         _err_samepos    = 'YOU CAN\'T MOVE YOUR PIECES TO THE SAME PLACE'
@@ -167,6 +173,8 @@ class Piece():
         _err_collision  = 'PIECES IN THE WAY'
         _err_castle     = 'CASTLING NOT POSSIBLE, CHECK CONDITIONS'
         _err_check      = 'KING IN CHECK, TRY ANOTHER MOVE'
+
+        _war_check      = '. YOUR KING NOW IN CHECK'
 
         def validate_move(func):
             def wrapper(row_i, col_i, row_f, col_f, check=False):
@@ -244,8 +252,6 @@ class Piece():
                     Game.pass_turn()
                     Board.show()
 
-                    if self.special == 'promoted': self.special = None
-
                     return True, output
                 else:
                     self.pos = old_place
@@ -263,10 +269,11 @@ class Piece():
             
             return wrapper
 
-        def check_mate():
+        def check_mate(attacking=False):
             valid_move = False
-            
+
             king = Board.kW1 if Game.wTurn else Board.kB1
+            
             k_row, k_col = convert(king.pos)
 
             horse_pos = [
@@ -474,6 +481,10 @@ class Piece():
         pos_f = convert(place)
 
         success, output = moves[self.name](*pos_i, *pos_f, check)
+
+        if success and self.special == 'promoted': self.special = None
+
+        if check_mate(attacking=True): output += _war_check
 
         return success, output
 
